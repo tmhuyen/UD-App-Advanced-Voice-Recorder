@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    tools:context=".MainActivity">
+    tools:context=".Login">
 
     <RelativeLayout
         android:id="@+id/relativeLayout"
@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.14"
-        tools:context=".MainActivity">
+        tools:context=".Login">
 
         <TextView
             android:id="@+id/textViewLogin"
@@ -72,19 +72,36 @@
             android:textColor="@color/md_theme_secondaryContainer"
             android:textColorHint="@color/md_theme_secondaryContainer" />
 
-        <Button
-            android:id="@+id/login_btn"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/linear_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="10dp"
+            android:orientation="horizontal"
             android:layout_below="@+id/password"
-            android:text="LOGIN"
-            android:background="@drawable/layout_bg"
-            android:layout_centerHorizontal="true"
-            android:fontFamily="@font/poppins_regular"
-            />
+            android:gravity="center">
+            <Button
+                android:id="@+id/login_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_margin="20dp"
+                android:text="LOGIN"
+                android:background="@drawable/layout_bg"
+                android:fontFamily="@font/poppins_regular"
+                />
+            <Button
+                android:id="@+id/signup_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_margin="20dp"
+                android:text="SIGN UP"
+                android:background="@drawable/layout_bg"
+
+                android:fontFamily="@font/poppins_regular"
+                />
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/forgot_password"
@@ -94,7 +111,7 @@
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="20dp"
             android:fontFamily="@font/poppins_regular"
-            android:layout_below="@+id/login_btn"
+            android:layout_below="@+id/linear_layout"
             android:gravity="center"
             android:text="@string/forgot_password"
             android:textColor="@color/md_theme_primary_highContrast"
@@ -116,6 +133,7 @@
             android:textSize="15sp"/>
 
         <ImageView
+            android:id="@+id/google"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="@drawable/google"
@@ -123,6 +141,8 @@
             android:layout_centerHorizontal="true"
             >
         </ImageView>
+
+
 
     </RelativeLayout>
 
