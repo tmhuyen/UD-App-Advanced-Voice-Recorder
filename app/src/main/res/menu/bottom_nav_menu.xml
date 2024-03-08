@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/home"
+        android:icon="@drawable/baseline_home_48"
+        android:fontFamily="@font/poppins_semibold"
+        android:title="Home" />
+    <item
+        android:id="@+id/recording"
+        android:icon="@drawable/baseline_mic_48"
+        android:fontFamily="@font/poppins_semibold"
+        android:title="Recording" />
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/baseline_settings_48"
+        android:fontFamily="@font/poppins_semibold"
+        android:title="Settings" />
+    <item
+        android:id="@+id/account"
+        android:icon="@drawable/baseline_account_circle_48"
+        android:fontFamily="@font/poppins_semibold"
+        android:title="Account" />
+
+</menu>

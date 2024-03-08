@@ -57,7 +57,7 @@ public class Login extends AppCompatActivity {
         //Sign up
         Button signup = findViewById(R.id.signup_btn);
         signup.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SignUp.class);
+            Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         });
         //Login with google
