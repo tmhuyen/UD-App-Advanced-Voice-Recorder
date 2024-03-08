@@ -35,7 +35,11 @@ public class Login extends AppCompatActivity {
         login.setOnClickListener(v -> {
             String user = username.getText().toString();
             String pass = password.getText().toString();
-            if (user.equals("admin") && pass.equals("admin")) {
+            if (user.equals("") || pass.equals("")) {
+                username.setError("Field cannot be empty");
+                password.setError("Field cannot be empty");
+            }
+            else if (user.equals("admin") && pass.equals("admin")) {
                 username.setText("");
                 password.setText("");
                 username.setError(null);
