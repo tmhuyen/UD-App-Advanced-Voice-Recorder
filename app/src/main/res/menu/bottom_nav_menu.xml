@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/home"
-        android:icon="@drawable/baseline_home_48"
+        android:id="@+id/records"
+        android:icon="@drawable/baseline_list_48"
         android:fontFamily="@font/poppins_semibold"
-        android:title="Home" />
+        android:title="Records" />
     <item
         android:id="@+id/recording"
         android:icon="@drawable/baseline_mic_48"

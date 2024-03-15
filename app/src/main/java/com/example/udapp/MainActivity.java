@@ -1,14 +1,35 @@
 package com.example.udapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 
+import com.example.udapp.databinding.ActivityMainBinding;
+
 public class MainActivity extends AppCompatActivity {
+
+    ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.records) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new RecordsFragment()).commit();
+            } else if (item.getItemId() == R.id.recording) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new RecordingFragment()).commit();
+            } else if (item.getItemId() == R.id.settings) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SettingsFragment()).commit();
+            } else if (item.getItemId() == R.id.account) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AccountFragment()).commit();
+            }
+            return true;
+        });
     }
 }
