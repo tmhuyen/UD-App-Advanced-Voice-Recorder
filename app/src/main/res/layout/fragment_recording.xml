@@ -19,5 +19,59 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <TextView
+            android:id="@+id/timeCounter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="30dp"
+            android:fontFamily="@font/poppins_semibold"
+            android:gravity="center"
+            android:text="00:00:00"
+            android:textColor="@color/md_theme_primary_highContrast"
+            android:textSize="60dp"
+            android:textStyle="bold" />
+
+        <com.chibde.visualizer.LineBarVisualizer
+            android:id="@+id/visualizerLineBar"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_below="@+id/timeCounter"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/recordFormat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/visualizerLineBar"
+            android:layout_marginTop="11dp"
+            android:fontFamily="@font/poppins_semibold"
+            android:layout_centerHorizontal="true"
+            android:text="Recording format: MP3"
+            android:textColor="@color/md_theme_scrim" />
+
+        <ImageView
+            android:id="@+id/recordBtn"
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_below="@+id/recordingFormat"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="60dp"
+            android:src="@drawable/recording_active" />
+
+        <ImageView
+            android:id="@+id/playBtn"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_below="@+id/recordingFormat"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="105dp"
+            android:layout_toEndOf="@+id/recordBtn"
+            android:src="@drawable/recording_play" />
+
+
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
