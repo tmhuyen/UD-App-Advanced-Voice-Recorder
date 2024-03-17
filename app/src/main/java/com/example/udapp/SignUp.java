@@ -2,11 +2,13 @@ package com.example.udapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class SignUp extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,18 +32,23 @@ public class SignUp extends AppCompatActivity {
                 password.setError("Password does not match");
                 confirm.setError("Password does not match");
             } else {
-                username.setText("");
-                password.setText("");
-                confirm.setText("");
-                username.setError(null);
-                password.setError(null);
-                confirm.setError(null);
-                username.clearFocus();
-                password.clearFocus();
-                confirm.clearFocus();
-                username.requestFocus();
-                password.requestFocus();
-                confirm.requestFocus();
+                // Add user to database
+                MyDB db = new MyDB(this);
+                db.addUser(user, pass);
+                finish();
+
+//                username.setText("");
+//                password.setText("");
+//                confirm.setText("");
+//                username.setError(null);
+//                password.setError(null);
+//                confirm.setError(null);
+//                username.clearFocus();
+//                password.clearFocus();
+//                confirm.clearFocus();
+//                username.requestFocus();
+//                password.requestFocus();
+//                confirm.requestFocus();
             }
         });
     }
