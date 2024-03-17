@@ -2,11 +2,15 @@ package com.example.udapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +39,15 @@ public class Login extends AppCompatActivity {
         login.setOnClickListener(v -> {
             String user = username.getText().toString();
             String pass = password.getText().toString();
+            // Check if username and password correct
+
+            MyDB helper = new MyDB(this);
+            SQLiteDatabase db = helper.getWritableDatabase();
+            Cursor rs = db.rawQuery("SELECT * FROM USERS WHERE USERNAME LIKE ? AND PASSWORD LIKE ?", new String[]{user, pass});
+            if (rs!= null && rs.getCount() > 0) {
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+            }
             if (user.equals("") || pass.equals("")) {
                 username.setError("Field cannot be empty");
                 password.setError("Field cannot be empty");
@@ -57,7 +70,7 @@ public class Login extends AppCompatActivity {
         //Sign up
         Button signup = findViewById(R.id.signup_btn);
         signup.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MainActivity.class);
+            Intent intent = new Intent(this, SignUp.class);
             startActivity(intent);
         });
         //Login with google
