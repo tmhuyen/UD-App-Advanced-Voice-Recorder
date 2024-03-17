@@ -30,6 +30,11 @@ public class SignUp extends AppCompatActivity {
                 password.setError("Password does not match");
                 confirm.setError("Password does not match");
             } else {
+                // Add user to database
+                MyDB db = new MyDB(this);
+                db.addUser(user, pass);
+                finish();
+
                 username.setText("");
                 password.setText("");
                 confirm.setText("");
