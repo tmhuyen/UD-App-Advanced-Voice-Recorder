@@ -5,10 +5,47 @@
     android:layout_height="match_parent"
     tools:context=".RecordsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_margin="16dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/records"
+            android:text="Recordings"
+            android:textSize="40sp"
+            android:textColor="@color/md_theme_primary_highContrast"
+            android:fontFamily="@font/poppins_semibold"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="10dp"
+            android:gravity="center"/>
 
+        <android.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_margin="10dp"
+            android:layout_below="@+id/records"
+            android:background="@drawable/searchview_bg"
+            android:fontFamily="@font/poppins_regular"
+            android:textColor="@color/md_theme_onBackground_highContrast"/>
+
+        <ListView
+            tools:listitem="@layout/list_records"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:id="@+id/recordsList"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="10.0sp"
+            android:layout_marginTop="10dp"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:scrollbarStyle="outsideOverlay"
+            android:scrollbars="vertical"
+            android:layout_below="@+id/searchView"
+            />
+
+
+    </RelativeLayout>
 </FrameLayout>
