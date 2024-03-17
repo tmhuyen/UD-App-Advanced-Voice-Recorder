@@ -86,7 +86,7 @@ public class RecordingFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        recordButton = getView().findViewById(R.id.recordBtn);
+        /*recordButton = getView().findViewById(R.id.recordBtn);
         playButton = getView().findViewById(R.id.playBtn);
         timeCounter = getView().findViewById(R.id.timeCounter);
         recordFormat = getView().findViewById(R.id.recordFormat);
@@ -116,11 +116,11 @@ public class RecordingFragment extends Fragment {
                     requestPermission();
                 }
             }
-        });
+        });*/
 
     }
 
-    public boolean checkRecordingPermission(){
+    /*public boolean checkRecordingPermission(){
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED){
             requestPermission();
             return false;
@@ -129,7 +129,7 @@ public class RecordingFragment extends Fragment {
     }
     private void requestPermission() {
         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
-    }
+    }*/
 
 
     @Override
@@ -139,7 +139,7 @@ public class RecordingFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_recording, container, false);
     }
 
-    @Override
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION){
@@ -153,5 +153,5 @@ public class RecordingFragment extends Fragment {
                 }
             }
         }
-    }
+    }*/
 }
