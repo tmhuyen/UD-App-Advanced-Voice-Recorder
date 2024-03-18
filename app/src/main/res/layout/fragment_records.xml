@@ -10,16 +10,27 @@
         android:layout_height="match_parent"
         android:layout_margin="16dp">
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/records"
             android:text="Recordings"
-            android:textSize="40sp"
+            android:textSize="35sp"
             android:textColor="@color/md_theme_primary_highContrast"
             android:fontFamily="@font/poppins_semibold"
             android:layout_marginTop="30dp"
-            android:layout_marginStart="10dp"
-            android:gravity="center"/>
+            android:layout_marginStart="10dp"/>
+
+        <ImageView
+            android:id="@+id/importBtn"
+            android:layout_width="66dp"
+            android:layout_height="51dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="85dp"
+            android:layout_marginTop="33dp"
+            android:layout_toEndOf="@+id/records"
+            android:background="@drawable/layout_bg"
+            android:src="@drawable/baseline_add_48"
+            android:padding="10dp" />
 
         <android.widget.SearchView
             android:id="@+id/searchView"
@@ -40,12 +51,11 @@
             android:divider="@android:color/transparent"
             android:dividerHeight="10.0sp"
             android:layout_marginTop="10dp"
-            android:scrollbarAlwaysDrawVerticalTrack="true"
             android:scrollbarStyle="outsideOverlay"
             android:scrollbars="vertical"
             android:layout_below="@+id/searchView"
-            />
-
+            >
+        </ListView>
 
     </RelativeLayout>
 </FrameLayout>
