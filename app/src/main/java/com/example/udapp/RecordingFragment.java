@@ -1,5 +1,6 @@
 package com.example.udapp;
 
+import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -10,6 +11,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +20,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.concurrent.Executor;
+import com.google.android.gms.common.util.concurrent.HandlerExecutor;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -45,13 +51,16 @@ public class RecordingFragment extends Fragment {
     ImageView playButton;
     TextView timeCounter;
     TextView recordFormat;
+    View visualizerLineBar;
     boolean isRecording = false;
     boolean isPlaying = false;
 
     int seconds = 0, minutes = 0, hours =0;
     String format = null;
+    String path = null;
     int dummySecond = 0;
     int playableSecond = 0;
+    Handler handler;
 
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -81,15 +90,19 @@ public class RecordingFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_recording);
+        getSupportActionBar().hide();
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        /*recordButton = getView().findViewById(R.id.recordBtn);
+        recordButton = getView().findViewById(R.id.recordBtn);
         playButton = getView().findViewById(R.id.playBtn);
         timeCounter = getView().findViewById(R.id.timeCounter);
         recordFormat = getView().findViewById(R.id.recordFormat);
+        visualizerLineBar = getView().findViewById(R.id.visualizerLineBar);
         mediaPlayer = new MediaPlayer();
 
 
@@ -105,22 +118,108 @@ public class RecordingFragment extends Fragment {
                                 mediaRecorder = new MediaRecorder();
                                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                                 mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+                                mediaRecorder.setOutputFile(getRecordingFilePath());
+                                path = getRecordingFilePath();
+                                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+                                try {
+                                    mediaRecorder.prepare();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                mediaRecorder.start();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        playableSecond = 0;
+                                        dummySecond = 0;
+                                        seconds = 0;
+                                        timeCounter.setText("00:00:00");
+                                        recordButton.setImageResource(R.drawable.recording_active);
+                                        visualizerLineBar.setVisibility(View.INVISIBLE);
+                                        recordFormat.setText(".Mp3");
+                                        runTimer();
+
+                                    }
+                                });
                             }
                         });
                     }
                     else {
+                        executorService.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                mediaRecorder.stop();
+                                mediaRecorder.release();
+                                mediaRecorder = null;
+                                playableSecond = seconds;
+                                dummySecond = seconds;
+                                seconds = 0;
+                                isRecording = false;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        playableSecond = 0;
+                                        dummySecond = 0;
+                                        seconds = 0;
+                                        recordButton.setImageResource(R.drawable.recording_in_active);
+                                        visualizerLineBar.setVisibility(View.VISIBLE);
+                                        recordFormat.setText(".Mp3");
+                                        handler.removeCallbacksAndMessages(null);
 
+                                    }
+                                });
+                            }
+                        });
                     }
                 }
                 else {
                     requestPermission();
                 }
             }
-        });*/
+        });
 
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (path != null){
+                    if (!isPlaying){
+                        isPlaying = true;
+                        try {
+                            mediaPlayer.setDataSource(path);
+                            mediaPlayer.prepare();
+                            mediaPlayer.start();
+                            playButton.setImageResource(R.drawable.recording_pause);
+                            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    playButton.setImageResource(R.drawable.recording_play);
+                                    isPlaying = false;
+                                }
+                            });
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
+                        mediaPlayer.stop();
+                        mediaPlayer.release();
+                        mediaPlayer = new MediaPlayer();
+                        playButton.setImageResource(R.drawable.recording_pause);
+                        isPlaying = false;
+                    }
+                }
+                else {
+                    Toast.makeText(getActivity(), "No Recording Found", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
-    /*public boolean checkRecordingPermission(){
+    private void runOnUiThread(Runnable tapToRecord) {
+    }
+
+    public boolean checkRecordingPermission(){
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED){
             requestPermission();
             return false;
@@ -129,7 +228,7 @@ public class RecordingFragment extends Fragment {
     }
     private void requestPermission() {
         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
-    }*/
+    }
 
 
     @Override
@@ -139,19 +238,26 @@ public class RecordingFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_recording, container, false);
     }
 
-    /*@Override
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 if (permissionToRecord) {
-                    Toast.makeText(getActivity(), "Permission Granted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Permission Given", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_SHORT).show();
                 }
             }
         }
-    }*/
+    }
+
+    private String getRecordingFilePath() {
+        ContextWrapper contextWrapper = new ContextWrapper(getContext());
+        File music = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
+        File file = new File(music, "testsfile" + "mp3");
+        return file.getPath();
+    }
 }
