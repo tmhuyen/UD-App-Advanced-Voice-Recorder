@@ -90,8 +90,8 @@ public class RecordingFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_recording);
-        getSupportActionBar().hide();
+        //setContentView(R.layout.fragment_recording);
+        //getSupportActionBar().hide();
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -138,7 +138,7 @@ public class RecordingFragment extends Fragment {
                                         recordButton.setImageResource(R.drawable.recording_active);
                                         visualizerLineBar.setVisibility(View.INVISIBLE);
                                         recordFormat.setText(".Mp3");
-                                        runTimer();
+                                        //runTimer();
 
                                     }
                                 });

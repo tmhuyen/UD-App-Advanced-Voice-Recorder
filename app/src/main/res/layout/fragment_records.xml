@@ -12,6 +12,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/Settings"
+            android:text="Recordings"
+            android:textSize="35sp"
+            android:textColor="@color/md_theme_primary_highContrast"
+            android:fontFamily="@font/poppins_semibold"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/records"
             android:text="Recordings"
             android:textSize="35sp"
