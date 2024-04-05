@@ -72,5 +72,42 @@
             android:dropDownVerticalOffset="40dp"
             android:minHeight="48dp" />
 
+        <TextView
+            android:id="@+id/save_path_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/output_format_spinner"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="10dp"
+            android:fontFamily="@font/poppins_semibold"
+            android:gravity="center"
+            android:text="Path"
+            android:textSize="20sp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/save_path_btn"
+            android:layout_below="@+id/save_path_label"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/poppins_regular"
+            android:text="Choose Path" />
+
+        <TextView
+            android:id="@+id/path_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/save_path_btn"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:fontFamily="@font/poppins_regular"
+            android:gravity="center"
+            android:text="Path"
+            android:textSize="10sp" />
+
+
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
