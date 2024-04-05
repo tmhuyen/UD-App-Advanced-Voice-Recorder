@@ -49,13 +49,18 @@ public class RecordsFragment extends Fragment {
     }
 
     private void loadRecordings() {
-        File directory = getActivity().getExternalCacheDir();
+        File directory = getActivity().getExternalCacheDir().getAbsoluteFile();
         File[] files = directory.listFiles();
         records = new ArrayList<>();
         for (File file : files) {
             // Assuming that the file name is in the format "audioHH:MM:SS.format"
             String fileName = file.getName();
-            records.add(new Record(fileName));
+            try {
+                records.add(new Record(fileName));
+            } catch (IllegalArgumentException e) {
+                // If the filename does not follow the expected format, skip this file
+                continue;
+            }
         }
         RecordAdapter adapter = new RecordAdapter(getActivity(), records);
         recordsListView.setAdapter(adapter);

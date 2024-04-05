@@ -132,6 +132,7 @@ public class RecordingFragment extends Fragment {
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             }
+
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
             fileName = getActivity().getExternalCacheDir().getAbsolutePath();
@@ -140,16 +141,15 @@ public class RecordingFragment extends Fragment {
             int secs = seconds % 60;
 
             String time = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs);
-            fileName+= "audio" +time + "." + audioFormat;
-            recorder.setOutputFile(fileName);
+            fileName+= "/audio_" + "_" + dtf.format(now)+ "." + audioFormat;
 
+            // Initialize the recorder object before calling setOutputFile
+            recorder = new MediaRecorder();
+            recorder.setOutputFile(fileName);
             recorder.prepare();
             recorder.start();
             isRecording = true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(getActivity(), "Failed to start recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        } catch (IllegalStateException e) {
+        } catch (IOException | IllegalStateException e) {
             e.printStackTrace();
             Toast.makeText(getActivity(), "Failed to start recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -176,7 +176,12 @@ public class RecordingFragment extends Fragment {
 
     private void stopRecording() {
         if (isRecording) {
-            recorder.stop();
+            try {
+                recorder.stop();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+                Toast.makeText(getActivity(), "Failed to stop recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
             recorder.release();
             recorder = null;
             isRecording = false;
