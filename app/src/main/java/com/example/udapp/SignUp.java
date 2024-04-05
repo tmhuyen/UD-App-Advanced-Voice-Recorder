@@ -7,8 +7,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignUp extends AppCompatActivity {
+    private DatabaseReference dbRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,8 +38,19 @@ public class SignUp extends AppCompatActivity {
                 confirm.setError("Password does not match");
             } else {
                 // Add user to database
-                MyDB db = new MyDB(this);
-                db.addUser(user, pass);
+//                MyDB db = new MyDB(this);
+//                db.addUser(user, pass);
+                dbRef = FirebaseDatabase.getInstance().getReference("users");
+                String userId = dbRef.push().getKey();
+                UserModel userModel = new UserModel(userId, user, pass);
+                dbRef.child(userId).setValue(userModel)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(this, "Sign up successful", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "Sign up failed", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                 finish();
 
 //                username.setText("");
