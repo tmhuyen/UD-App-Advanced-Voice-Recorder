@@ -12,12 +12,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.File;
+import java.util.List;
 
-public class RecordAdapter extends ArrayAdapter<File> {
+public class RecordAdapter extends ArrayAdapter<Record> {
 
-    public RecordAdapter(@NonNull Context context, File[] files) {
-        super(context, 0, files);
+    public RecordAdapter(Context context, List<Record> records) {
+        super(context, 0, records);
     }
+
 
     @NonNull
     @Override
@@ -26,14 +28,14 @@ public class RecordAdapter extends ArrayAdapter<File> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_records, parent, false);
         }
 
-        File file = getItem(position);
+        Record file = getItem(position);
 
         TextView recordName = convertView.findViewById(R.id.recordName);
         TextView recordInfo = convertView.findViewById(R.id.recordInfo);
         ImageView playIcon = convertView.findViewById(R.id.playIcon);
 
-        recordName.setText(file.getName());
-        recordInfo.setText("Information of the record | Time of the record");
+        recordName.setText(file.getFileName());
+        recordInfo.setText(file.getDuration() + " | " + file.getFormat());
         playIcon.setImageResource(R.drawable.baseline_play_arrow_48);
 
         return convertView;

@@ -41,18 +41,4 @@ public class MyDB extends SQLiteOpenHelper {
         db.execSQL("INSERT INTO RECORDS(FILENAME, DURATION) VALUES('" + fileName + "', " + duration + ")");
     }
 
-    public List<Record> getAllRecords() {
-        List<Record> records = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM RECORDS", null);
-        if (cursor.moveToFirst()) {
-            do {
-                String fileName = cursor.getString(cursor.getColumnIndex("FILENAME"));
-                int duration = cursor.getInt(cursor.getColumnIndex("DURATION"));
-                records.add(new Record(fileName, duration));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return records;
-    }
 }

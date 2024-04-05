@@ -27,10 +27,13 @@ public class RecordsFragment extends Fragment {
     public RecordsFragment() {
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_records, container, false);
+
+        myDB = new MyDB(getActivity()); // Initialize myDB here
 
         recordsListView = view.findViewById(R.id.recordsList);
         recordsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -46,10 +49,19 @@ public class RecordsFragment extends Fragment {
     }
 
     private void loadRecordings() {
-        List<Record> records = myDB.getAllRecords();
-        RecordAdapter adapter = new RecordAdapter(getActivity(), records.toArray(new java.lang.Record[0]));
+        File directory = getActivity().getExternalCacheDir();
+        File[] files = directory.listFiles();
+        records = new ArrayList<>();
+        for (File file : files) {
+            // Assuming that the file name is in the format "audioHH:MM:SS.format"
+            String fileName = file.getName();
+            records.add(new Record(fileName));
+        }
+        RecordAdapter adapter = new RecordAdapter(getActivity(), records);
         recordsListView.setAdapter(adapter);
     }
+
+
 
     private void playRecording(Record record) {
         player = new MediaPlayer();

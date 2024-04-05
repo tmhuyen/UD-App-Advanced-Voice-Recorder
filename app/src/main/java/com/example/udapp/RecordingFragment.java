@@ -135,7 +135,12 @@ public class RecordingFragment extends Fragment {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
             fileName = getActivity().getExternalCacheDir().getAbsolutePath();
-            fileName = "audio" + dtf.format(now)+ "." + audioFormat;
+            int hours = seconds / 3600;
+            int minutes = (seconds % 3600) / 60;
+            int secs = seconds % 60;
+
+            String time = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs);
+            fileName+= "audio" +time + "." + audioFormat;
             recorder.setOutputFile(fileName);
 
             recorder.prepare();
@@ -177,8 +182,6 @@ public class RecordingFragment extends Fragment {
             isRecording = false;
         }
         handler.removeCallbacks(runnable);
-        // Save the record information in the database
-        myDB.addRecord(fileName, seconds);
         // Show a Toast message with the file path
         TextView textPath = getActivity().findViewById(R.id.recordPath);
         textPath.setText(String.format("Recording saved to: %s", fileName));
