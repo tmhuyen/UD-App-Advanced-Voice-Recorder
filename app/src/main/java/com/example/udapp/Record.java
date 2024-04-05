@@ -11,21 +11,21 @@ public class Record {
     private LocalDateTime dateTime;
 
     public Record(String fileName) {
-        if (!fileName.contains("/audio_")) {
+        if (!fileName.contains("audio")) {
             throw new IllegalArgumentException("Invalid fileName: " + fileName);
         }
-        String[] parts = fileName.split("/audio_");
+        String[] parts = fileName.split("audio");
         this.fileName = parts[0];
         String[] timeAndDateTimeAndFormat = parts[1].split("\\.");
         this.format = timeAndDateTimeAndFormat[1];
-        String[] timeAndDateTime = timeAndDateTimeAndFormat[0].split("_");
+        String[] timeAndDateTime = timeAndDateTimeAndFormat[0].split(" ");
         String[] timeParts = timeAndDateTime[0].split(":");
         int hours = Integer.parseInt(timeParts[0]);
         int minutes = Integer.parseInt(timeParts[1]);
         int seconds = Integer.parseInt(timeParts[2]);
         this.duration = hours * 3600 + minutes * 60 + seconds;
         this.time = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
         this.dateTime = LocalDateTime.parse(timeAndDateTime[1], dtf);
     }
 

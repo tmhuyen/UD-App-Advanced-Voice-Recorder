@@ -133,7 +133,7 @@ public class RecordingFragment extends Fragment {
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             }
 
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
             fileName = getActivity().getExternalCacheDir().getAbsolutePath();
             int hours = seconds / 3600;
@@ -141,10 +141,8 @@ public class RecordingFragment extends Fragment {
             int secs = seconds % 60;
 
             String time = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs);
-            fileName+= "/audio_" + "_" + dtf.format(now)+ "." + audioFormat;
+            fileName+= "audio"+ time + dtf.format(now)+"." + audioFormat;
 
-            // Initialize the recorder object before calling setOutputFile
-            recorder = new MediaRecorder();
             recorder.setOutputFile(fileName);
             recorder.prepare();
             recorder.start();
