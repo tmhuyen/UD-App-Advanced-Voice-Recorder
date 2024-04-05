@@ -47,7 +47,8 @@ public class RecordsFragment extends Fragment {
 
     private void loadRecordings() {
         List<Record> records = myDB.getAllRecords();
-        RecordAdapter adapter = new RecordAdapter(getActivity(), records.toArray(new java.lang.Record[0]));
+        Record[] recordArray = records.toArray(new Record[records.size()]);
+        RecordAdapter adapter = new RecordAdapter(getActivity(), recordArray);
         recordsListView.setAdapter(adapter);
     }
 

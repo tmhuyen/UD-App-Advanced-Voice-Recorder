@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "353434001585",
+    "firebase_url": "https://record-voice-f7bc5-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "record-voice-f7bc5",
+    "storage_bucket": "record-voice-f7bc5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:353434001585:android:fb45b5b613710b32248290",
+        "android_client_info": {
+          "package_name": "com.example.udapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH8qHnAahzy2Cc5rUyfVX1ptQBYXCEz2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
