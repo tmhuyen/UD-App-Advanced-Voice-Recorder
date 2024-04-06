@@ -61,7 +61,7 @@ public class Login extends AppCompatActivity {
                     if (dataSnapshot.exists()) {
                         for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                             UserModel userModel = userSnapshot.getValue(UserModel.class);
-                            if (userModel != null && userModel.getPassword().equals(password)) {
+                            if (userModel != null && userModel.checkPassword(password)) {
                                 // Đăng nhập thành công, chuyển sang MainActivity
                                 Intent intent = new Intent(Login.this, MainActivity.class);
                                 startActivity(intent);
