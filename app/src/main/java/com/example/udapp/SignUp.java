@@ -30,11 +30,16 @@ public class SignUp extends AppCompatActivity {
             String user = username.getText().toString();
             String pass = password.getText().toString();
             String conf = confirm.getText().toString();
-            if (user.equals("") || pass.equals("") || conf.equals("")) {
+            if(user.equals("")){
                 username.setError("Field cannot be empty");
-                password.setError("Field cannot be empty");
-                confirm.setError("Field cannot be empty");
-            } else if (!pass.equals(conf)) {
+                if(pass.equals("")){
+                    password.setError("Field cannot be empty");
+                    if(conf.equals("")){
+                        confirm.setError("Field cannot be empty");
+                    }
+                }
+            }
+            else if (!pass.equals(conf)) {
                 password.setError("Password does not match");
                 confirm.setError("Password does not match");
             } else {

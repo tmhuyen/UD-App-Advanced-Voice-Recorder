@@ -47,9 +47,11 @@ public class Login extends AppCompatActivity {
             String username = txtUsername.getText().toString();
             String password = txtPassword.getText().toString();
 
-            if (username.equals("") || password.equals("")) {
+            if(username.equals("")){
                 txtUsername.setError("Field cannot be empty");
-                txtPassword.setError("Field cannot be empty");
+                if(password.equals("")){
+                    txtPassword.setError("Field cannot be empty");
+                }
             }
             // Check if username and password correct
             FirebaseDatabase database = FirebaseDatabase.getInstance();
