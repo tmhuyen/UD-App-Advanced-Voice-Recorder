@@ -113,11 +113,13 @@ public class Login extends AppCompatActivity {
             Intent intent = new Intent(this, SignUp.class);
             startActivity(intent);
         });
-        //Login with google
+        // Configure Google Sign In
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
         gsc = GoogleSignIn.getClient(this, gso);
+
+        // Set up a click listener for the google_btn
         google_btn = findViewById(R.id.google);
         google_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,19 +130,23 @@ public class Login extends AppCompatActivity {
         });
 
 
-
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode,Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1000) {
-            Task<GoogleSignInAccount> task =  GoogleSignIn.getSignedInAccountFromIntent(data);
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                task.getResult(ApiException.class);
-                //navigateToSecondActivity();
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                if (account != null) {
+                    // Sign in was successful, navigate to MainActivity
+                    Intent intent = new Intent(this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
             } catch (ApiException e) {
-                Toast.makeText(getApplicationContext(),"Something went wrong!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Something went wrong!", Toast.LENGTH_SHORT).show();
             }
         }
     }

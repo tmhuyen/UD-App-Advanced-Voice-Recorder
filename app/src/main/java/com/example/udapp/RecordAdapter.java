@@ -35,7 +35,7 @@ public class RecordAdapter extends ArrayAdapter<Record> {
         ImageView playIcon = convertView.findViewById(R.id.playIcon);
 
         recordName.setText(file.getFileName());
-        recordInfo.setText(file.getDuration() + "s   " + file.getTime());
+        //recordInfo.setText(file.getDuration() + "s   " + file.getTime());
         playIcon.setImageResource(R.drawable.baseline_play_arrow_48);
 
         return convertView;

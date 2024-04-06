@@ -50,20 +50,16 @@ public class RecordsFragment extends Fragment {
     }
 
     private void loadRecordings() {
-        File directory = getActivity().getExternalCacheDir().getAbsoluteFile();
-        File[] files = directory.listFiles();
+        // Load recordings from the external cache directory
         records = new ArrayList<>();
-        for (File file : files) {
-            // Assuming that the file name is in the format "audioHH:MM:SS.format"
-            String fileName = file.getName();
-            try {
-                records.add(new Record(fileName));
-            } catch (IllegalArgumentException e) {
-                // If the filename does not follow the expected format, skip this file
-                continue;
-            }
+        audioFiles = getActivity().getExternalCacheDir().listFiles();
+        for (File file : audioFiles) {
+            Record record = new Record(file.getName(), file.length(), file.lastModified());
+            records.add(record);
         }
+        // Create a RecordAdapter object
         RecordAdapter adapter = new RecordAdapter(getActivity(), records);
+        // Set the adapter for the recordsListView
         recordsListView.setAdapter(adapter);
     }
 
