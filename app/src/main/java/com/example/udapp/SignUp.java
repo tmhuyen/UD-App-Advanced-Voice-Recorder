@@ -5,10 +5,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import org.mindrot.jbcrypt.BCrypt;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -29,11 +30,16 @@ public class SignUp extends AppCompatActivity {
             String user = username.getText().toString();
             String pass = password.getText().toString();
             String conf = confirm.getText().toString();
-            if (user.equals("") || pass.equals("") || conf.equals("")) {
+            if(user.equals("")){
                 username.setError("Field cannot be empty");
-                password.setError("Field cannot be empty");
-                confirm.setError("Field cannot be empty");
-            } else if (!pass.equals(conf)) {
+                if(pass.equals("")){
+                    password.setError("Field cannot be empty");
+                    if(conf.equals("")){
+                        confirm.setError("Field cannot be empty");
+                    }
+                }
+            }
+            else if (!pass.equals(conf)) {
                 password.setError("Password does not match");
                 confirm.setError("Password does not match");
             } else {
@@ -43,6 +49,8 @@ public class SignUp extends AppCompatActivity {
                 dbRef = FirebaseDatabase.getInstance().getReference("users");
                 String userId = dbRef.push().getKey();
                 UserModel userModel = new UserModel(userId, user, pass);
+                Log.d("SignUp", "UserModel: " + userModel.toString());
+                Log.d("SignUp", "password" + userModel.getPassword());
                 dbRef.child(userId).setValue(userModel)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {

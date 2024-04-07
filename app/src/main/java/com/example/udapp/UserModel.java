@@ -1,5 +1,7 @@
 package com.example.udapp;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 public class UserModel {
     private String userId;
     private String username;
@@ -11,7 +13,11 @@ public class UserModel {
     public UserModel(String userId, String username, String password) {
         this.userId = userId;
         this.username = username;
-        this.password = password;
+        this.password = hashPassword(password);
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getUserId() {
@@ -30,11 +36,11 @@ public class UserModel {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public boolean checkPassword(String txtPassword) {
+        return BCrypt.checkpw(txtPassword, password); // Kiểm tra tính hợp lệ của mật khẩu
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    private String hashPassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt()); // Băm mật khẩu với salt ngẫu nhiên
     }
 }

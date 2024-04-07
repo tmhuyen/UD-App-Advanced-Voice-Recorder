@@ -47,9 +47,11 @@ public class Login extends AppCompatActivity {
             String username = txtUsername.getText().toString();
             String password = txtPassword.getText().toString();
 
-            if (username.equals("") || password.equals("")) {
+            if(username.equals("")){
                 txtUsername.setError("Field cannot be empty");
-                txtPassword.setError("Field cannot be empty");
+                if(password.equals("")){
+                    txtPassword.setError("Field cannot be empty");
+                }
             }
             // Check if username and password correct
             FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -61,7 +63,7 @@ public class Login extends AppCompatActivity {
                     if (dataSnapshot.exists()) {
                         for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                             UserModel userModel = userSnapshot.getValue(UserModel.class);
-                            if (userModel != null && userModel.getPassword().equals(password)) {
+                            if (userModel != null && userModel.checkPassword(password)) {
                                 // Đăng nhập thành công, chuyển sang MainActivity
                                 Intent intent = new Intent(Login.this, MainActivity.class);
                                 startActivity(intent);
