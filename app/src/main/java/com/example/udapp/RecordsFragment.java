@@ -63,7 +63,7 @@ public class RecordsFragment extends Fragment {
     private void loadRecordings() {
         audioFiles = getAllFilesInExternalCache(getActivity());
         for (File file : audioFiles) {
-            records.add(new Record(file.getName(), MP3Helper.getDuration(getActivity(), file), MP3Helper.getLastModifiedTime(getActivity(), file)));
+            records.add(new Record(file.getName(), MP3Helper.getDurationFormatted(getActivity(), file), MP3Helper.getLastModifiedTime(getActivity(), file)));
         }
     }
 

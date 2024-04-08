@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -33,6 +34,8 @@ public class Login extends AppCompatActivity {
     GoogleSignInOptions gso;
     GoogleSignInClient gsc;
     ImageView google_btn;
+    private static final String PREFS_NAME = "LoginPrefs";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +44,15 @@ public class Login extends AppCompatActivity {
         //Normal login
         TextView txtUsername = findViewById(R.id.username);
         TextView txtPassword = findViewById(R.id.password);
+
+
+        // Check if user is already logged in
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        if (((SharedPreferences) settings).getString("logged", "").equals("logged")) {
+            Intent intent = new Intent(Login.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
 
         Button login = findViewById(R.id.login_btn);
         login.setOnClickListener(v -> {
@@ -64,6 +76,9 @@ public class Login extends AppCompatActivity {
                         for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
                             UserModel userModel = userSnapshot.getValue(UserModel.class);
                             if (userModel != null && userModel.checkPassword(password)) {
+                                // Save login status
+                                settings.edit().putString("logged", "logged").apply();
+
                                 // Đăng nhập thành công, chuyển sang MainActivity
                                 Intent intent = new Intent(Login.this, MainActivity.class);
                                 startActivity(intent);
