@@ -8,26 +8,21 @@ public class Record {
     private int duration;
     private String format;
     private String time;
+    private String lastModified;
     private LocalDateTime dateTime;
 
-    public Record(String fileName, long length, long lastModified) {
-        fileName = fileName.replace(".mp3", "");
-//        if (!fileName.contains("audio")) {
-//            throw new IllegalArgumentException("Invalid fileName: " + fileName);
-//        }
-//        String[] parts = fileName.split("audio");
-//        this.fileName = parts[0];
-//        String[] timeAndDateTimeAndFormat = parts[1].split("\\.");
-//        this.format = timeAndDateTimeAndFormat[1];
-//        String[] timeAndDateTime = timeAndDateTimeAndFormat[0].split(" ");
-//        String[] timeParts = timeAndDateTime[0].split(":");
-//        int hours = Integer.parseInt(timeParts[0]);
-//        int minutes = Integer.parseInt(timeParts[1]);
-//        int seconds = Integer.parseInt(timeParts[2]);
-//        this.duration = hours * 3600 + minutes * 60 + seconds;
-//        this.time = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
-//        this.dateTime = LocalDateTime.parse(timeAndDateTime[1], dtf);
+    public Record(String fileName, long duration, long lastModified) {
+        //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+        //fileName+= "/audio"+ dtf.format(now)+"." + audioFormat;
+
+        //Seperate the file name from the path
+        this.fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
+        this.duration = (int) duration;
+        this.format = fileName.substring(fileName.lastIndexOf('.') + 1);
+        //get time by split dtf.format(now)
+        this.time = fileName.substring(fileName.lastIndexOf('/') + 6, fileName.lastIndexOf('.'));
+        this.lastModified = String.valueOf(lastModified);
+
     }
 
     public String getFileName() {

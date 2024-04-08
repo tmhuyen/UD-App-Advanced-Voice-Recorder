@@ -12,11 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecordAdapter extends ArrayAdapter<Record> {
 
-    public RecordAdapter(Context context, List<Record> records) {
+    public RecordAdapter(Context context, ArrayList<Record> records) {
         super(context, 0, records);
     }
 
@@ -35,6 +36,7 @@ public class RecordAdapter extends ArrayAdapter<Record> {
         ImageView playIcon = convertView.findViewById(R.id.playIcon);
 
         recordName.setText(file.getFileName());
+        recordInfo.setText(file.getDuration() + "s   " + file.getTime());
         //recordInfo.setText(file.getDuration() + "s   " + file.getTime());
         playIcon.setImageResource(R.drawable.baseline_play_arrow_48);
 

@@ -141,7 +141,7 @@ public class RecordingFragment extends Fragment {
             int secs = seconds % 60;
 
             String time = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs);
-            fileName+= "audio"+ time + dtf.format(now)+"." + audioFormat;
+            fileName+= "/audio"+ dtf.format(now)+"." + audioFormat;
 
             recorder.setOutputFile(fileName);
             recorder.prepare();
@@ -188,6 +188,7 @@ public class RecordingFragment extends Fragment {
         // Show a Toast message with the file path
         TextView textPath = getActivity().findViewById(R.id.recordPath);
         textPath.setText(String.format("Recording saved to: %s", fileName));
+        System.out.println("Recording saved to: " + fileName);
     }
 
     @Override
