@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/accountFragment">
+
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.example.udapp.Login"
+        android:label="LoginActivity" />
+
+    <fragment
+        android:id="@+id/accountFragment"
+        android:name="com.example.udapp.AccountFragment"
+        android:label="AccountFragment" >
+        <action
+            android:id="@+id/action_accountFragment_to_loginActivity"
+            app:destination="@id/loginActivity" />
+    </fragment>
+
+
+
+</navigation>

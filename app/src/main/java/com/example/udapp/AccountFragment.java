@@ -1,5 +1,6 @@
 package com.example.udapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,8 +8,13 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.content.SharedPreferences;
 
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+import com.example.udapp.R;
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link AccountFragment#newInstance} factory method to
@@ -54,6 +60,7 @@ public class AccountFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
@@ -76,7 +83,22 @@ public class AccountFragment extends Fragment {
             emailTextView.setText(email);
             idTextView.setText(id);
         }
+        // Find the logout button and set an OnClickListener
+        Button logoutButton = view.findViewById(R.id.logout_btn);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Remove the user's login information
+                SharedPreferences settings = getActivity().getSharedPreferences("LoginPrefs", 0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.remove("logged");
+                editor.apply();
 
+                // Redirect to the login page
+                Intent intent = new Intent(getActivity(), Login.class);
+                startActivity(intent);
+            }
+        });
         return view;
     }
 }
