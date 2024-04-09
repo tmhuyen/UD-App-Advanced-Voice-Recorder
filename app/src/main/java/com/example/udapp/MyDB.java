@@ -41,4 +41,8 @@ public class MyDB extends SQLiteOpenHelper {
         db.execSQL("INSERT INTO RECORDS(FILENAME, DURATION) VALUES('" + fileName + "', " + duration + ")");
     }
 
+    public void insertRecording(String fileName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("INSERT INTO RECORDS(FILENAME) VALUES('" + fileName + "')");
+    }
 }

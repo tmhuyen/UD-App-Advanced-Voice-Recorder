@@ -2,6 +2,7 @@ package com.example.udapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,12 +51,21 @@ public class RecordsFragment extends Fragment {
         RecordAdapter adapter = new RecordAdapter(getActivity(), (ArrayList<Record>) records);
         recordsListView.setAdapter(adapter);
 
-//        recordsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                playRecording(records.get(position));
-//            }
-//        });
+        recordsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //playRecording(String.valueOf(records.get(position)));
+                String fileName = getActivity().getExternalCacheDir().getAbsolutePath();
+                String filePath = records.get(position).getFilePath();
+                fileName += "/" + filePath;
+                //playRecording(filePath);
+                String selectedFileName = records.get(position).getFileName();
+                Intent intent = new Intent(getActivity(), PlayBackground.class);
+                intent.putExtra("fileName", fileName);
+                Log.e("RecordsFragment", "Playing " + fileName);
+                getActivity().startService(intent);
+            }
+        });
 
         return view;
     }

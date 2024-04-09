@@ -9,21 +9,50 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import java.io.File;
+import java.io.IOException;
+
 public class PlayBackground extends Service {
-    public static boolean boolIsServiceCreated = false; MediaPlayer player;
+    private static final String TAG = "PlayBackground";
+    private MediaPlayer player;
 
     @Override
     public void onCreate() {
-        Toast.makeText(this, "MyService4 Created", Toast.LENGTH_LONG).show();
-        Log.e("MyService4", "onCreate");
-        boolIsServiceCreated = true;
-        player = MediaPlayer.create(getApplicationContext(), R.raw.good_bad_ugly);
+        super.onCreate();
+        Log.d(TAG, "onCreate: Service created");
     }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && intent.hasExtra("fileName")) {
+            String fileName = intent.getStringExtra("fileName");
+            Log.d(TAG, "onStartCommand: Playing recording: " + fileName);
+            playRecording(fileName);
+        }
+        return START_NOT_STICKY;
+    }
+
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "MyService4 Stopped", Toast.LENGTH_LONG).show();
-        Log.e("MyService4", "onDestroy");
-        player.stop(); player.release(); player = null;
+        super.onDestroy();
+        if (player != null) {
+            player.stop();
+            player.release();
+            player = null;
+        }
+        Log.d(TAG, "onDestroy: Service destroyed");
+    }
+
+    private void playRecording(String fileName) {
+        player = new MediaPlayer();
+        Log.e(TAG, "playRecording: Playing recording");
+        try {
+            player.setDataSource(fileName);
+            player.prepare();
+            player.start();
+        } catch (IOException e) {
+            Log.e(TAG, "playRecording: Failed to play recording", e);
+        }
     }
 
     @Nullable
@@ -31,13 +60,4 @@ public class PlayBackground extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
-
-    @Override
-    public void onStart(Intent intent, int startid) {
-        if (player.isPlaying()) Toast.makeText(this, "MyService4 Already Started " + startid, Toast.LENGTH_LONG).show();
-        else Toast.makeText(this, "MyService4 Started " + startid, Toast.LENGTH_LONG).show();
-        Log.e("MyService4", "onStart");
-        player.start();
-    }
-
 }
