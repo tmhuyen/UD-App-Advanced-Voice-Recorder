@@ -185,6 +185,8 @@ public class RecordingFragment extends Fragment {
             isRecording = false;
         }
         handler.removeCallbacks(runnable);
+        // Save the recording to the database
+        myDB.insertRecording(fileName);
         // Show a Toast message with the file path
         TextView textPath = getActivity().findViewById(R.id.recordPath);
         textPath.setText(String.format("Recording saved to: %s", fileName));
