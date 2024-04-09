@@ -149,7 +149,7 @@ public class RecordingFragment extends Fragment {
             isRecording = true;
         } catch (IOException | IllegalStateException e) {
             e.printStackTrace();
-            Toast.makeText(getActivity(), "Failed to start recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getActivity(), "Failed to start recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
         TextView timeCounter = getActivity().findViewById(R.id.timeCounter);
@@ -178,7 +178,7 @@ public class RecordingFragment extends Fragment {
                 recorder.stop();
             } catch (IllegalStateException e) {
                 e.printStackTrace();
-                Toast.makeText(getActivity(), "Failed to stop recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "Failed to stop recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
             recorder.release();
             recorder = null;
@@ -199,7 +199,7 @@ public class RecordingFragment extends Fragment {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 onRecord();
             } else {
-                Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
     }

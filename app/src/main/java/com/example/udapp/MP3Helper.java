@@ -49,7 +49,7 @@ public class MP3Helper {
                 long hours = TimeUnit.MILLISECONDS.toHours(durationMillis);
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(durationMillis - TimeUnit.HOURS.toMillis(hours));
                 long seconds = TimeUnit.MILLISECONDS.toSeconds(durationMillis - TimeUnit.HOURS.toMillis(hours) - TimeUnit.MINUTES.toMillis(minutes));
-                Toast.makeText(context, "Duration: " + hours + ":" + minutes + ":" + seconds, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "Duration: " + hours + ":" + minutes + ":" + seconds, Toast.LENGTH_SHORT).show();
                 return String.format("%02d:%02d:%02d", hours, minutes, seconds);
             } catch (Exception e) {
                 Log.e("MP3Helper", "Error retrieving duration for file: " + mp3File.getAbsolutePath(), e);
