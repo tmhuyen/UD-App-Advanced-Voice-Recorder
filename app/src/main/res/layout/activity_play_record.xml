@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PlayRecord">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding = "16dp">
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="30dp"
+            android:src="@drawable/baseline_arrow_back_ios_48"
+            android:onClick="backtoMain"
+            android:name="back"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"/>
+
+        <TextView
+            android:id="@+id/recordName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/back"
+            android:fontFamily="@font/poppins_semibold"
+            android:text="Name of the record"
+            android:textColor="@color/md_theme_primary_highContrast"
+            android:textSize="15sp"
+            android:layout_centerHorizontal="true"/>
+
+        <com.chibde.visualizer.LineBarVisualizer
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:id="@+id/visualizer"
+            android:layout_below="@+id/recordName"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            app:vb_lineColor="@color/md_theme_primary"/>
+
+        <TextView
+            android:id="@+id/recordTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="30dp"
+            android:layout_below="@+id/visualizer"
+            android:fontFamily="@font/poppins_semibold"
+            android:text="Time of the record"
+            android:textColor="@color/md_theme_primary_highContrast"
+            android:textSize="15sp"
+            android:layout_centerHorizontal="true"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/recordTime"
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_centerHorizontal="true">
+
+            <ImageView
+                android:id="@+id/playIcon"
+                android:layout_width="119dp"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                android:layout_marginEnd="10dp"
+                android:onClick="playRecord"
+                android:src="@drawable/recording_play" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
