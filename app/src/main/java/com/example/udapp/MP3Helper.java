@@ -26,6 +26,7 @@ public class MP3Helper {
         }
     }
 
+
     // Method to get duration of an MP3 file
     public static String getDurationFormatted(Context context, File mp3File) {
         // Check if the app has the READ_EXTERNAL_STORAGE permission

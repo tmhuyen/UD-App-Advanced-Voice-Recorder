@@ -33,11 +33,11 @@ public class RecordAdapter extends ArrayAdapter<Record> {
 
         TextView recordName = convertView.findViewById(R.id.recordName);
         TextView recordInfo = convertView.findViewById(R.id.recordInfo);
-        ImageView playIcon = convertView.findViewById(R.id.playIcon);
+        ImageView note = convertView.findViewById(R.id.editNoteIcon);
 
         recordName.setText(file.getFileName());
         recordInfo.setText(file.getDuration() + "  |  " + file.getTime());
-        playIcon.setImageResource(R.drawable.baseline_play_arrow_48);
+        note.setImageResource(R.drawable.baseline_edit_note_24);
 
         return convertView;
     }

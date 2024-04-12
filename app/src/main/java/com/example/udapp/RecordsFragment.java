@@ -1,13 +1,17 @@
 package com.example.udapp;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.media.MediaPlayer;
 import android.widget.Toast;
@@ -67,7 +71,53 @@ public class RecordsFragment extends Fragment {
             }
         });
 
-        return view;
+//        recordsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//            @Override
+//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+//                Record selectedRecord = records.get(position);
+//                String oldFileName = selectedRecord.getFileName();
+//
+//                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//                builder.setTitle("Rename File");
+//
+//                final EditText input = new EditText(getActivity());
+//                input.setInputType(InputType.TYPE_CLASS_TEXT);
+//                builder.setView(input);
+//
+////                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        String newFileName = input.getText().toString();
+//                        //keep the recording time and format
+//                        newFileName = newFileName + oldFileName.substring(oldFileName.lastIndexOf('|'));
+//                        //example for old and newfileName
+//                        //oldFileName = "audio|2021.09.29 14:00:00.mp3"
+//                        //newFileName = "newName|2021.09.29 14:00:00.mp3"
+//                        File oldFile = new File(getActivity().getExternalCacheDir(), oldFileName);
+//                        File newFile = new File(getActivity().getExternalCacheDir(), newFileName);
+//                        boolean renamed = oldFile.renameTo(newFile);
+//                        if (renamed) {
+//                            selectedRecord.setFileName(newFileName);
+//                            ((ArrayAdapter) parent.getAdapter()).notifyDataSetChanged();
+//                            Toast.makeText(getActivity(), "File renamed to: " + newFileName, Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Toast.makeText(getActivity(), "Failed to rename file", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                });
+//                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.cancel();
+//                    }
+//                });
+//
+//                builder.show();
+//                return true;
+//            }
+//        });
+//
+       return view;
     }
 
     private void loadRecordings() {

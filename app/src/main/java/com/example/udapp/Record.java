@@ -8,7 +8,7 @@ public class Record {
     private String filePath;
     private String duration;
     private String format;
-    private String time;
+    private String time = "";
     private String lastModified;
     private LocalDateTime dateTime;
 
@@ -16,7 +16,6 @@ public class Record {
         this.filePath = fileName;
         //DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
         //fileName+= "/audio"+ dtf.format(now)+"." + audioFormat;
-
         //Seperate the file name from the path
         this.fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
         this.duration = duration;
@@ -49,5 +48,9 @@ public class Record {
 
     public LocalDateTime getDateTime() {
         return dateTime;
+    }
+
+    public void setFileName(String newFileName) {
+        this.fileName = newFileName;
     }
 }

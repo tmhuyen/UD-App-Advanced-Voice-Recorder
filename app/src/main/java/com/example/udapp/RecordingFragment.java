@@ -38,7 +38,9 @@ public class RecordingFragment extends Fragment {
     private int seconds = 0;
     private Visualizer visualizer = null;
     private String audioFormat = "mp3";
+    private String inputDevice = null;
     private boolean isRecording = false;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -46,8 +48,9 @@ public class RecordingFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-            fileName = bundle.getString("path");
-            audioFormat = bundle.getString("format");
+            // Get the selected audio source and output format from the bundle
+            inputDevice = bundle.getString("selectedAudioSource");
+            audioFormat = bundle.getString("selectedOutputFormat");
         }
         ImageView recordButton = view.findViewById(R.id.recordBtn);
         ImageView playButton = view.findViewById(R.id.playBtn);
@@ -118,17 +121,17 @@ public class RecordingFragment extends Fragment {
             recorder = new MediaRecorder();
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             if (audioFormat == null) {
-                audioFormat = "mp3";
+                audioFormat = "MP3";
             }
-            else if (audioFormat.equals("mp3")){
+            if (audioFormat.equals("MP3")){
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             }
-            else if (audioFormat.equals("aac")) {
+            else if (audioFormat.equals("AAC")) {
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             }
-            else if (audioFormat.equals("wav")) {
+            else if (audioFormat.equals("WAV")) {
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             }
