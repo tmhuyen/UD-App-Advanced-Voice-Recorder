@@ -47,11 +47,14 @@
             android:id="@+id/searchView"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_margin="10dp"
             android:layout_below="@+id/records"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/searchview_bg"
             android:fontFamily="@font/poppins_regular"
-            android:textColor="@color/md_theme_onBackground_highContrast"/>
+            android:textColor="@color/md_theme_onBackground_highContrast" />
 
         <ListView
             tools:listitem="@layout/list_records"

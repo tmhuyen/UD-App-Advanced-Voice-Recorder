@@ -20,6 +20,7 @@ import android.content.Context;
 import java.io.File;
 import java.io.IOException;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class RecordsFragment extends Fragment {
     private List<Record> records;
     private File[] audioFiles;
     private MediaPlayer player = null;
+    private RecordAdapter adapter;
 
     public RecordsFragment() {
     }
@@ -43,6 +45,7 @@ public class RecordsFragment extends Fragment {
         return new File[0];
     }
 
+    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_records, container, false);
@@ -117,6 +120,21 @@ public class RecordsFragment extends Fragment {
 //            }
 //        });
 //
+        recordsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Record record = (Record) parent.getItemAtPosition(position);
+
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share Record");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, record.toString()); // Modify this based on how you want to represent the Record
+
+                startActivity(Intent.createChooser(shareIntent, "Share via"));
+                return true;
+            }
+        });
+
        return view;
     }
 

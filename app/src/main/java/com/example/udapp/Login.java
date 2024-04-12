@@ -170,9 +170,6 @@ public class Login extends AppCompatActivity{
     private static final String TAG = "SignInWithGoogleActivity";
 
 
-
-
-    // Set up a click listener for the google_btn
-        //google_btn = findViewById(R.id.google);
+    // Set up a click listener for the google_btn  google_btn = findViewById(R.id.google);
 
 }
