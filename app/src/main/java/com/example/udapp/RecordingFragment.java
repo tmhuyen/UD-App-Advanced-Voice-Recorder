@@ -38,9 +38,7 @@ public class RecordingFragment extends Fragment {
     private int seconds = 0;
     private Visualizer visualizer = null;
     private String audioFormat = "mp3";
-    private String inputDevice = null;
     private boolean isRecording = false;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,9 +46,8 @@ public class RecordingFragment extends Fragment {
 
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-            // Get the selected audio source and output format from the bundle
-            inputDevice = bundle.getString("selectedAudioSource");
-            audioFormat = bundle.getString("selectedOutputFormat");
+            fileName = bundle.getString("path");
+            audioFormat = bundle.getString("format");
         }
         ImageView recordButton = view.findViewById(R.id.recordBtn);
         ImageView playButton = view.findViewById(R.id.playBtn);
@@ -121,17 +118,17 @@ public class RecordingFragment extends Fragment {
             recorder = new MediaRecorder();
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             if (audioFormat == null) {
-                audioFormat = "MP3";
+                audioFormat = "mp3";
             }
-            if (audioFormat.equals("MP3")){
+            else if (audioFormat.equals("mp3")){
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             }
-            else if (audioFormat.equals("AAC")) {
+            else if (audioFormat.equals("aac")) {
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             }
-            else if (audioFormat.equals("WAV")) {
+            else if (audioFormat.equals("wav")) {
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             }
@@ -188,8 +185,6 @@ public class RecordingFragment extends Fragment {
             isRecording = false;
         }
         handler.removeCallbacks(runnable);
-        // Save the recording to the database
-        myDB.insertRecording(fileName);
         // Show a Toast message with the file path
         TextView textPath = getActivity().findViewById(R.id.recordPath);
         textPath.setText(String.format("Recording saved to: %s", fileName));
