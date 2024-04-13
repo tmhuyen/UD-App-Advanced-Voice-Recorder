@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.media.MediaPlayer;
+import android.widget.SearchView;
 import android.widget.Toast;
 import android.content.Context;
 
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecordsFragment extends Fragment {
-
+    private SearchView searchView;
     private ListView recordsListView;
     private List<Record> records;
     private File[] audioFiles;
@@ -58,6 +59,20 @@ public class RecordsFragment extends Fragment {
         RecordAdapter adapter = new RecordAdapter(getActivity(), (ArrayList<Record>) records);
         recordsListView.setAdapter(adapter);
 
+        searchView = view.findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                adapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
         recordsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
