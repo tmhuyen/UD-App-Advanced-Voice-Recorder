@@ -20,6 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -96,11 +97,22 @@ public class AccountFragment extends Fragment {
             emailTextView.setText(email);
             idTextView.setText(id);
         }
+        mAuth = FirebaseAuth.getInstance();
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
+        FirebaseUser user = mAuth.getCurrentUser();
         TextView nameTextView = view.findViewById(R.id.name);
         SharedPreferences settings = getActivity().getSharedPreferences("LoginPrefs", 0);
         String name = settings.getString("username", "");
         Log.d("AccountFragment", "onCreate: " + name);
-        nameTextView.setText("Name: "+name);
+        if (user != null) {
+            nameTextView.setText("Name: "+ user.getDisplayName());
+        } else {
+            nameTextView.setText("Name: "+ name);
+        }
 
         // Find the logout button and set an OnClickListener
         Button logoutButton = view.findViewById(R.id.logout_btn);
@@ -116,12 +128,7 @@ public class AccountFragment extends Fragment {
                 editor.remove("username");
                 editor.apply();
 
-                mAuth = FirebaseAuth.getInstance();
-                gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(getString(R.string.default_web_client_id))
-                        .requestEmail()
-                        .build();
-                mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
+
                 mAuth.signOut();
                 mGoogleSignInClient.signOut();
 
