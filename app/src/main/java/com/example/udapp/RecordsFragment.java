@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.ListView;
 import android.media.MediaPlayer;
 import android.widget.SearchView;
@@ -72,6 +73,8 @@ public class RecordsFragment extends Fragment {
                 adapter.getFilter().filter(newText);
                 return false;
             }
+
+
         });
         recordsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

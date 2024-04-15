@@ -1,10 +1,12 @@
 package com.example.udapp;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,11 +18,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecordAdapter extends ArrayAdapter<Record> {
+    private List<Record> filteredRecords;
+    private List<Record> records;
 
     public RecordAdapter(Context context, ArrayList<Record> records) {
-        super(context, 0, records);
-    }
 
+        super(context, 0, records);
+        this.records = new ArrayList<>(records);
+        this.filteredRecords = new ArrayList<>(records);
+    }
+    @Override
+    public int getCount() {
+        return filteredRecords.size();
+    }
+    @Override
+    public Record getItem(int position) {
+        return filteredRecords.get(position);
+    }
 
     @NonNull
     @Override
@@ -40,5 +54,37 @@ public class RecordAdapter extends ArrayAdapter<Record> {
         note.setImageResource(R.drawable.baseline_edit_note_24);
 
         return convertView;
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+                if (constraint == null || constraint.length() == 0) {
+                    results.values = records; // 'records' is your original list.
+                    results.count = records.size();
+                } else {
+                    filteredRecords = new ArrayList<>();
+                    for (Record record : records) {
+                        if (record.getFileName().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                            Log.d("RecordAdapter", "performFiltering: " + record.getFileName().toLowerCase());
+                            Log.e("RecordAdapter", "performFiltering: " + constraint.toString().toLowerCase());
+                            filteredRecords.add(record);
+                        }
+                    }
+                    results.values = filteredRecords;
+                    results.count = filteredRecords.size();
+                }
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                filteredRecords = (List<Record>) results.values;
+                notifyDataSetChanged();
+            }
+        };
     }
 }
