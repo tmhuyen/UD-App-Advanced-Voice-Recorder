@@ -10,4 +10,5 @@
     <string name="sign_up">SIGN UP</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="default_web_client_id">353434001585-mj3ffh023odh71jn91qr1c0vabia5sfg.apps.googleusercontent.com</string>
 </resources>

@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,11 @@ import android.content.SharedPreferences;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import com.example.udapp.R;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.firebase.auth.FirebaseAuth;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link AccountFragment#newInstance} factory method to
@@ -30,6 +36,10 @@ public class AccountFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    GoogleSignInClient mGoogleSignInClient;
+    GoogleSignInOptions gso;
 
     public AccountFragment() {
         // Required empty public constructor
@@ -75,16 +85,27 @@ public class AccountFragment extends Fragment {
             String id = bundle.getString("id");
 
             // Display the account information
-            TextView nameTextView = view.findViewById(R.id.name);
+
             TextView emailTextView = view.findViewById(R.id.email);
             TextView idTextView = view.findViewById(R.id.id);
 
-            nameTextView.setText(name);
+
+//            email = settings.getString("email", "");
+//            id = settings.getString("id", "");
+
             emailTextView.setText(email);
             idTextView.setText(id);
         }
+        TextView nameTextView = view.findViewById(R.id.name);
+        SharedPreferences settings = getActivity().getSharedPreferences("LoginPrefs", 0);
+        String name = settings.getString("username", "");
+        Log.d("AccountFragment", "onCreate: " + name);
+        nameTextView.setText("Name: "+name);
+
         // Find the logout button and set an OnClickListener
         Button logoutButton = view.findViewById(R.id.logout_btn);
+
+
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,7 +113,18 @@ public class AccountFragment extends Fragment {
                 SharedPreferences settings = getActivity().getSharedPreferences("LoginPrefs", 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.remove("logged");
+                editor.remove("username");
                 editor.apply();
+
+                mAuth = FirebaseAuth.getInstance();
+                gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestEmail()
+                        .build();
+                mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
+                mAuth.signOut();
+                mGoogleSignInClient.signOut();
+
 
                 // Redirect to the login page
                 Intent intent = new Intent(getActivity(), Login.class);

@@ -35,16 +35,25 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -57,9 +66,11 @@ public class Login extends AppCompatActivity{
     private static final int RC_SIGN_IN = 9001;
     private static final String SERVER_CLIENT_ID = "254965457831-dgmjq36p7gc572jp7t1crc20nmceh9ks.apps.googleusercontent.com";
     private GoogleSignInClient mGoogleSignInClient;
+    private FirebaseAuth mAuth;
     private CredentialManager mCredentialManager;
     private Executor executor = Executors.newSingleThreadExecutor();
     private CancellationSignal cancellationSignal = new CancellationSignal();
+
 
 
 
@@ -103,7 +114,9 @@ public class Login extends AppCompatActivity{
                             UserModel userModel = userSnapshot.getValue(UserModel.class);
                             if (userModel != null && userModel.checkPassword(password)) {
                                 // Save login status
+
                                 settings.edit().putString("logged", "logged").apply();
+                                settings.edit().putString("username", username).apply();
 
                                 // Đăng nhập thành công, chuyển sang MainActivity
                                 Intent intent = new Intent(Login.this, MainActivity.class);
@@ -157,8 +170,73 @@ public class Login extends AppCompatActivity{
             startActivity(intent);
         });
 
+        mAuth = FirebaseAuth.getInstance();
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            String userName = user.getDisplayName();
+            Toast.makeText(this, "Welcome back, " + userName, Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(Login.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
+        //Google login
+        google_btn = findViewById(R.id.google);
+        google_btn.setOnClickListener(v -> {
+            signInGG();
+        });
+
 
     }
+
+    private void signInGG() {
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                firebaseAuthWithGoogle(account.getIdToken());
+            } catch (ApiException e) {
+                Toast.makeText(this, "Google sign in failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            Toast.makeText(Login.this, "Signed in as " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(Login.this, MainActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(Login.this, "Authentication failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
     GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(true)
             .setServerClientId(SERVER_CLIENT_ID)
@@ -171,5 +249,4 @@ public class Login extends AppCompatActivity{
 
 
     // Set up a click listener for the google_btn  google_btn = findViewById(R.id.google);
-
 }
