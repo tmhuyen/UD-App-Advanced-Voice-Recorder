@@ -21,10 +21,30 @@ import androidx.fragment.app.Fragment;
 
 import com.chibde.visualizer.LineBarVisualizer;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+
+import com.google.api.gax.longrunning.OperationFuture;
+import com.google.api.gax.rpc.ClientStream;
+import com.google.api.gax.rpc.ResponseObserver;
+import com.google.api.gax.rpc.StreamController;
+
+import com.google.cloud.speech.v1p1beta1.RecognitionConfig;
+import com.google.cloud.speech.v1p1beta1.RecognizeResponse;
+import com.google.cloud.speech.v1p1beta1.SpeechClient;
+import com.google.cloud.speech.v1p1beta1.RecognizeRequest;
+import com.google.cloud.speech.v1p1beta1.RecognitionAudio;
+import com.google.cloud.speech.v1p1beta1.SpeechRecognitionAlternative;
+import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult;
+import com.google.cloud.speech.v1p1beta1.StreamingRecognitionConfig;
+//import com.google.cloud.speech.v1p1beta1.StreamingRecognitionRequest;
+//import com.google.cloud.speech.v1p1beta1.StreamingRecognitionResponse;
+import com.google.protobuf.ByteString;
+
+
 
 public class RecordingFragment extends Fragment {
 
@@ -191,6 +211,16 @@ public class RecordingFragment extends Fragment {
         TextView textPath = getActivity().findViewById(R.id.recordPath);
         textPath.setText(String.format("Recording saved to: %s", fileName));
         System.out.println("Recording saved to: " + fileName);
+
+        String transcribedText = "";
+        try {
+            transcribedText = transcribeAudio(fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle transcription error
+        }
+        TextView textTranscription = getActivity().findViewById(R.id.textTranscription);
+        textTranscription.setText("Transcription: " + transcribedText);
     }
 
     @Override
@@ -203,4 +233,60 @@ public class RecordingFragment extends Fragment {
             }
         }
     }
+
+    private String transcribeAudio(String filePath) throws IOException {
+        // Replace with your Google Cloud project ID
+        String projectId = "record-voice-f7bc5";
+
+        // Create a SpeechClient instance
+        try (SpeechClient speechClient = SpeechClient.create()) {
+
+            // Set audio content
+            ByteString audioContent = ByteString.readFrom(new FileInputStream(filePath));
+
+            // Configure request with recognition settings
+            RecognitionConfig config = RecognitionConfig.newBuilder()
+                    .setEncoding(RecognitionConfig.AudioEncoding.MP3) // Set encoding based on your format
+                    .setSampleRateHertz(16000) // Set sample rate (adjust if needed)
+                    .setLanguageCode("en-US") // Set language code (change for other languages)
+                    .build();
+
+            // Create recognition audio
+            RecognitionAudio audio = RecognitionAudio.newBuilder()
+                    .setContent(audioContent)
+                    .build();
+
+            // Create recognize request
+            RecognizeRequest request = RecognizeRequest.newBuilder()
+                    .setConfig(config)
+                    .setAudio(audio)
+                    .build();
+
+//            // Perform speech recognition
+//            OperationFuture<RecognizeResponse> responseFuture = speechClient.recognizeAsync(request);
+//
+//            while (!responseFuture.isDone()) {
+//                // Do something while waiting for response
+//            }
+//
+//            // Get transcribed text
+//            RecognizeResponse response = responseFuture.get();
+//            for (SpeechRecognitionAlternative alternative : response.getAlternativesList()) {
+//                return alternative.getTranscript();
+//            }
+
+            // Perform speech recognition
+            RecognizeResponse response = speechClient.recognize(request);
+
+            // Get transcribed text
+            for (SpeechRecognitionResult result : response.getResultsList()) {
+                for (SpeechRecognitionAlternative alternative : result.getAlternativesList()) {
+                    return alternative.getTranscript();
+                }
+            }
+        }
+
+        return "";
+    }
+
 }

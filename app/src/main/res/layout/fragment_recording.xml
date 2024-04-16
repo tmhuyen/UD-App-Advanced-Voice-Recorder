@@ -60,6 +60,14 @@
             android:text="Recording path: /storage/emulated/0/Download"
             android:textColor="@color/md_theme_scrim" />
 
+        <TextView
+            android:id="@+id/textTranscription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/recordPath"
+            android:layout_centerHorizontal="true"
+            android:text="textTranscription" />
+
         <ImageView
             android:id="@+id/recordBtn"
             android:layout_width="156dp"

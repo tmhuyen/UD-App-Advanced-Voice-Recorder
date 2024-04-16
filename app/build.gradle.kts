@@ -32,6 +32,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    packagingOptions {
+        exclude("META-INF/INDEX.LIST")
+        exclude("META-INF/DEPENDENCIES")
+    }
 }
 
 dependencies {
@@ -56,6 +61,7 @@ dependencies {
     //implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation (platform("com.google.firebase:firebase-bom:29.0.0"))
+    implementation ("com.google.cloud:google-cloud-speech:2.3.0")
     //implementation("org.conscrypt:conscrypt-android:2.9.1")
 
 }
