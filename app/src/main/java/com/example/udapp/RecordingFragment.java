@@ -1,12 +1,15 @@
 package com.example.udapp;
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.media.audiofx.Visualizer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +24,16 @@ import androidx.fragment.app.Fragment;
 
 import com.chibde.visualizer.LineBarVisualizer;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.api.gax.longrunning.OperationFuture;
 import com.google.api.gax.rpc.ClientStream;
 import com.google.api.gax.rpc.ResponseObserver;
@@ -42,12 +49,21 @@ import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult;
 import com.google.cloud.speech.v1p1beta1.StreamingRecognitionConfig;
 //import com.google.cloud.speech.v1p1beta1.StreamingRecognitionRequest;
 //import com.google.cloud.speech.v1p1beta1.StreamingRecognitionResponse;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.StorageReference;
 import com.google.protobuf.ByteString;
 
-
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 public class RecordingFragment extends Fragment {
 
+    private static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION = 1001;
+    private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 1002;
     private MyDB myDB;
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private MediaRecorder recorder = null;
@@ -59,6 +75,11 @@ public class RecordingFragment extends Fragment {
     private Visualizer visualizer = null;
     private String audioFormat = "mp3";
     private boolean isRecording = false;
+    private StorageReference storageReference;
+    private DatabaseReference dbRef;
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    GoogleSignInClient mGoogleSignInClient;
+    GoogleSignInOptions gso;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,11 +93,19 @@ public class RecordingFragment extends Fragment {
         ImageView recordButton = view.findViewById(R.id.recordBtn);
         ImageView playButton = view.findViewById(R.id.playBtn);
 
+        // Initialize Firebase Storage
+        storageReference = FirebaseStorage.getInstance().getReference();
+
 
         recordButton.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
-            } else {
+            } else if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION);
+            } else if (ContextCompat.checkSelfPermission(getActivity(), "android.permission.READ_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(), new String[]{"android.permission.READ_EXTERNAL_STORAGE"}, REQUEST_READ_EXTERNAL_STORAGE_PERMISSION);
+            }
+            else {
                 seconds = 0;
                 onRecord();
             }
@@ -155,14 +184,15 @@ public class RecordingFragment extends Fragment {
 
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
-            fileName = getActivity().getExternalCacheDir().getAbsolutePath();
+            //fileName = getActivity().getExternalCacheDir().getAbsolutePath();
+            File tempFile = File.createTempFile("audio", "." + audioFormat, getActivity().getCacheDir());
             int hours = seconds / 3600;
             int minutes = (seconds % 3600) / 60;
             int secs = seconds % 60;
 
             String time = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs);
-            fileName+= "/audio"+ dtf.format(now)+"." + audioFormat;
-
+            //fileName+= "/audio"+ dtf.format(now)+"." + audioFormat;
+            fileName = tempFile.getAbsolutePath();
             recorder.setOutputFile(fileName);
             recorder.prepare();
             recorder.start();
@@ -205,6 +235,10 @@ public class RecordingFragment extends Fragment {
             isRecording = false;
         }
         handler.removeCallbacks(runnable);
+
+        // Upload the audio file to Firebase Storage
+        uploadAudioToFirebase(fileName);
+
         // Save the recording to the database
         myDB.insertRecording(fileName);
         // Show a Toast message with the file path
@@ -221,6 +255,77 @@ public class RecordingFragment extends Fragment {
         }
         TextView textTranscription = getActivity().findViewById(R.id.textTranscription);
         textTranscription.setText("Transcription: " + transcribedText);
+
+        // Delete the temporary file
+        new File(fileName).delete();
+    }
+
+    private void uploadAudioToFirebase(String filePath) {
+        Toast.makeText(getActivity(), "Uploading audio to Firebase Storage " + filePath, Toast.LENGTH_SHORT).show();
+        Log.d("RecordingFragment", "Uploading audio to Firebase Storage " + filePath);
+        if (filePath != null) {
+            // Create a reference to the audio file in Firebase Storage
+            String fileName = "audio_" + System.currentTimeMillis() + ".mp3"; // Adjust file name as needed
+            StorageReference audioRef = storageReference.child("audio").child(fileName);
+
+            // Upload the file to Firebase Storage
+            UploadTask uploadTask = audioRef.putFile(Uri.fromFile(new File(filePath)));
+
+            // Register observers to listen for upload success or failure
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                // Handle successful upload
+                //Toast.makeText(getActivity(), "Upload successful", Toast.LENGTH_SHORT).show();
+                // Get the download URL
+                audioRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String downloadUrl = uri.toString();
+
+                    // Save the download URL to Firebase Realtime Database or Firestore if needed
+                    mAuth = FirebaseAuth.getInstance();
+                    gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(getString(R.string.default_web_client_id))
+                            .requestEmail()
+                            .build();
+                    mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
+                    FirebaseUser user = mAuth.getCurrentUser();
+
+                    SharedPreferences settings = getActivity().getSharedPreferences("LoginPrefs", 0);
+                    String name = settings.getString("username", "");
+
+                    dbRef = FirebaseDatabase.getInstance().getReference("records");
+                    String recordId = dbRef.push().getKey();
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    int duration = 0;
+                    try {
+                        mediaPlayer.setDataSource(filePath);
+                        mediaPlayer.prepare();
+                        duration = mediaPlayer.getDuration(); // Duration in milliseconds
+                        mediaPlayer.release();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    RecordFirebase recordFB;
+                    if (user != null) {
+                        recordFB = new RecordFirebase(recordId, user.getDisplayName(), downloadUrl, fileName, duration);
+                    } else {
+                        recordFB = new RecordFirebase(recordId, name, downloadUrl, fileName, duration);
+                    }
+
+                    dbRef.child(recordId).setValue(recordFB)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getActivity(), "Record saved to Firebase", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getActivity(), "Failed to save record to Firebase", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+
+                });
+            }).addOnFailureListener(exception -> {
+                // Handle failed upload
+                Toast.makeText(getActivity(), "Upload failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+        }
     }
 
     @Override

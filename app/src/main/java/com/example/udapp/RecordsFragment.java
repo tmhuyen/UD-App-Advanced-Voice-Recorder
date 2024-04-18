@@ -3,6 +3,8 @@ package com.example.udapp;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -23,23 +25,46 @@ import java.io.File;
 import java.io.IOException;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RecordsFragment extends Fragment {
+    private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 1002;
     private SearchView searchView;
     private ListView recordsListView;
-    private List<Record> records;
+    private List<RecordFirebase> records;
     private File[] audioFiles;
     private MediaPlayer player = null;
     private RecordAdapter adapter;
+    private StorageReference storageReference;
+    private DatabaseReference dbRef;
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    GoogleSignInClient mGoogleSignInClient;
+    GoogleSignInOptions gso;
 
     public RecordsFragment() {
     }
 
     public File[] getAllFilesInExternalCache(Context context) {
+        if (ContextCompat.checkSelfPermission(getActivity(), "android.permission.READ_EXTERNAL_STORAGE") != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{"android.permission.READ_EXTERNAL_STORAGE"}, REQUEST_READ_EXTERNAL_STORAGE_PERMISSION);
+        }
         File externalCacheDir = context.getExternalCacheDir();
         if (externalCacheDir != null) {
             return externalCacheDir.listFiles();
@@ -56,9 +81,8 @@ public class RecordsFragment extends Fragment {
         records = new ArrayList<>();
 
         loadRecordings();
+        Log.d("RecordsFragment", "Records: " + records.size());
 
-        RecordAdapter adapter = new RecordAdapter(getActivity(), (ArrayList<Record>) records);
-        recordsListView.setAdapter(adapter);
 
         searchView = view.findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -81,7 +105,7 @@ public class RecordsFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //playRecording(String.valueOf(records.get(position)));
                 String fileName = getActivity().getExternalCacheDir().getAbsolutePath();
-                String filePath = records.get(position).getFilePath();
+                String filePath = records.get(position).getDownloadUrl();
                 fileName += "/" + filePath;
                 //playRecording(filePath);
                 String selectedFileName = records.get(position).getFileName();
@@ -157,10 +181,48 @@ public class RecordsFragment extends Fragment {
     }
 
     private void loadRecordings() {
-        audioFiles = getAllFilesInExternalCache(getActivity());
-        for (File file : audioFiles) {
-            records.add(new Record(file.getName(), MP3Helper.getDurationFormatted(getActivity(), file), MP3Helper.getLastModifiedTime(getActivity(), file)));
+//        audioFiles = getAllFilesInExternalCache(getActivity());
+//        for (File file : audioFiles) {
+//            records.add(new Record(file.getName(), MP3Helper.getDurationFormatted(getActivity(), file), MP3Helper.getLastModifiedTime(getActivity(), file)));
+//        }
+        mAuth = FirebaseAuth.getInstance();
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        SharedPreferences settings = getActivity().getSharedPreferences("LoginPrefs", 0);
+        String name = settings.getString("username", "");
+        String username;
+        if (user != null) {
+            username = user.getDisplayName();
+        } else {
+            username = name;
         }
+
+        dbRef = FirebaseDatabase.getInstance().getReference("records");
+        Log.d("Firebase", "Username: " + username);
+        dbRef.orderByChild("username").equalTo(username).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot recordSnapshot : dataSnapshot.getChildren()) {
+                    RecordFirebase record = recordSnapshot.getValue(RecordFirebase.class);
+                    records.add(new RecordFirebase(record.getRecordId(),record.getUsername(),record.getDownloadUrl(),record.getFileName(),record.getDuration()));
+                    Log.d("Firebase", "Record: " + record.getFileName());
+                }
+                Log.d("RecordsFragment", "Records: " + records.size());
+                adapter = new RecordAdapter(getActivity(), (ArrayList<RecordFirebase>) records);
+                recordsListView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e("Firebase", "Error getting data", error.toException());
+            }
+        });
+
     }
 
     private void playRecording(String record) {
