@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -24,14 +25,18 @@ import android.content.Context;
 import java.io.File;
 import java.io.IOException;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -39,6 +44,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
@@ -104,15 +111,48 @@ public class RecordsFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //playRecording(String.valueOf(records.get(position)));
-                String fileName = getActivity().getExternalCacheDir().getAbsolutePath();
-                String filePath = records.get(position).getDownloadUrl();
-                fileName += "/" + filePath;
-                //playRecording(filePath);
-                String selectedFileName = records.get(position).getFileName();
-                Intent intent = new Intent(getActivity(), PlayBackground.class);
-                intent.putExtra("fileName", fileName);
-                Log.e("RecordsFragment", "Playing " + fileName);
-                getActivity().startService(intent);
+//                String fileName = getActivity().getExternalCacheDir().getAbsolutePath();
+//                String filePath = records.get(position).getDownloadUrl();
+//                fileName += "/" + filePath;
+//                //playRecording(filePath);
+//                String selectedFileName = records.get(position).getFileName();
+//                Intent intent = new Intent(getActivity(), PlayBackground.class);
+//                intent.putExtra("fileName", fileName);
+//                Log.e("RecordsFragment", "Playing " + fileName);
+//                getActivity().startService(intent);
+
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+                StorageReference storageRef = storage.getReferenceFromUrl(records.get(position).getDownloadUrl());
+
+                File localFile = new File(getActivity().getExternalCacheDir(), records.get(position).getFileName());
+
+                storageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        // Local temp file has been created
+                        Log.d("Firebase", "Download Success");
+                        player = new MediaPlayer();
+                        try {
+                            player.setDataSource(localFile.getAbsolutePath());
+                            player.prepare();
+                            player.start();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        if (player != null && player.isPlaying()) {
+                            player.stop();
+                            player.release();
+                            player = null;
+                            localFile.delete();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle any errors
+                        Log.e("Firebase", "Download Failed");
+                    }
+                });
             }
         });
 
@@ -165,15 +205,44 @@ public class RecordsFragment extends Fragment {
         recordsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Record record = (Record) parent.getItemAtPosition(position);
+                RecordFirebase record = (RecordFirebase) parent.getItemAtPosition(position);
 
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share Record");
-                shareIntent.putExtra(Intent.EXTRA_TEXT, record.toString()); // Modify this based on how you want to represent the Record
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+                StorageReference storageRef = storage.getReferenceFromUrl(record.getDownloadUrl());
 
-                startActivity(Intent.createChooser(shareIntent, "Share via"));
+                File localFile = new File(getActivity().getExternalCacheDir(), record.getFileName());
+
+                storageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        // Local temp file has been created
+                        Log.d("Firebase", "Download Success");
+
+                        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                        shareIntent.setType("*/*");
+                        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share Record");
+                        Uri fileUri = FileProvider.getUriForFile(getActivity(), getActivity().getPackageName() + ".provider", localFile);
+                        shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+                        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(Intent.createChooser(shareIntent, "Share via"));
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle any errors
+                        Log.e("Firebase", "Download Failed");
+                    }
+                });
+
                 return true;
+//                //Record record = (Record) parent.getItemAtPosition(position);
+//                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+//                shareIntent.setType("text/plain");
+//                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share Record");
+//                shareIntent.putExtra(Intent.EXTRA_TEXT, record.toString()); // Modify this based on how you want to represent the Record
+//
+//                startActivity(Intent.createChooser(shareIntent, "Share via"));
+//                return true;
             }
         });
 
