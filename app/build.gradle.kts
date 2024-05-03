@@ -62,12 +62,12 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation (platform("com.google.firebase:firebase-bom:29.0.0"))
     implementation ("com.google.cloud:google-cloud-speech:2.3.0")
-    implementation ("com.google.auth:google-auth-library-oauth2-http:0.22.2")
+    //implementation ("com.google.auth:google-auth-library-oauth2-http:0.22.2")
     implementation("com.google.android.gms:play-services-drive:17.0.0")
     implementation("com.google.api-client:google-api-client-android:1.31.5")
-    implementation("com.google.api-client:google-api-client:1.31.5")
-    implementation("com.google.api-services:drive:v3-rev20210802-1.32.1")
-    implementation("com.google.apis:google-api-services-drive:v3-rev20230502-2.0.0")
+    //implementation("com.google.api-client:google-api-client:1.31.5")
+    //implementation("com.google.api-services:drive:v3-rev20210802-1.32.1")
+    //implementation("com.google.apis:google-api-services-drive:v3-rev20230502-2.0.0")
 
     implementation("com.google.api-client:google-api-client-jackson2:1.31.5")// Or latest version
 

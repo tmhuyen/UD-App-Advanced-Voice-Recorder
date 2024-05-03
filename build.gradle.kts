@@ -2,13 +2,10 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        jcenter()
     }
 
     dependencies {
-        classpath("com.google.gms:google-services:4.4.1")
-        classpath("com.google.api-client:google-api-client:1.32.1")
-
+        classpath("com.android.tools.build:gradle:7.0.4");
     }
 }
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
