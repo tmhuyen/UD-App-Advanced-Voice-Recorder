@@ -19,8 +19,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
@@ -74,6 +78,7 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
 
         convertView.setOnTouchListener(new View.OnTouchListener() {
             float downXValue;
+
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -201,45 +206,66 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
     }
 
     private void deleteFileInFirebase(int position) {
-        if (position < 0 || position >= records.size()) {
-            // Position is not valid, do not proceed
-            return;
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            // User is signed in, you can try to get a token
+            auth.getCurrentUser().getIdToken(true)
+                    .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                        public void onComplete(@NonNull Task<GetTokenResult> task) {
+                            if (task.isSuccessful()) {
+                                // Proceed with deletion
+                                if (position < 0 || position >= records.size()) {
+                                    // Position is not valid, do not proceed
+                                    return;
+                                }
+
+                                RecordFirebase record = records.get(position);
+                                StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(record.getDownloadUrl());
+
+                                storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        // File exists, proceed with deletion
+                                        storageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                // File deleted successfully
+                                                // Delete the record from the list
+                                                records.remove(position); // Remove the record from the list
+                                                // Delete the record from the database
+                                                FirebaseStorage.getInstance().getReference().child("records").child(record.getFileName()).delete();
+                                                notifyDataSetChanged(); // Refresh the list
+
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                // Handle any errors
+                                                Toast.makeText(context, "Failed to delete file", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        // File does not exist, handle the error
+                                        if (e instanceof IOException && e.getMessage().contains("\"code\": 404")) {
+                                            Toast.makeText(context, "File does not exist", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            // Other errors
+                                            Toast.makeText(context, "An error occurred", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                            } else {
+                                // Handle error -> task.getException();
+                            }
+                        }
+                    });
+        } else {
+            // No user is signed in
+            Toast.makeText(context, "Please sign in before trying to get a token.", Toast.LENGTH_SHORT).show();
         }
-
-        RecordFirebase record = records.get(position);
-        StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(record.getDownloadUrl());
-
-        storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                // File exists, proceed with deletion
-                storageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // File deleted successfully
-                        records.remove(position); // Remove the record from the list
-                        notifyDataSetChanged(); // Refresh the list
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Handle any errors
-                        Toast.makeText(context, "Failed to delete file", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                // File does not exist, handle the error
-                if (e instanceof IOException && e.getMessage().contains("\"code\": 404")) {
-                    Toast.makeText(context, "File does not exist", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Other errors
-                    Toast.makeText(context, "An error occurred", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     @Override
