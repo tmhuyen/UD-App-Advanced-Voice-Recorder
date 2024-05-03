@@ -84,9 +84,8 @@ public class SettingsFragment extends Fragment {
                 bundle.putString("selectedAudioSource", selectedAudioSource);
                 bundle.putString("selectedOutputFormat", selectedOutputFormat);
 
-
                 // Create an instance of RecordingFragment and set the Bundle as its arguments
-                RecordingFragment recordingFragment = RecordingFragment.getInstance();
+                RecordingFragment recordingFragment = new RecordingFragment();
                 recordingFragment.setArguments(bundle);
 
                 // Replace the current fragment with the RecordingFragment instance

@@ -65,5 +65,5 @@ dependencies {
     implementation ("com.google.cloud:google-cloud-speech:2.3.0")
     implementation ("com.google.auth:google-auth-library-oauth2-http:0.22.2")
     //implementation("org.conscrypt:conscrypt-android:2.9.1")
-
+    implementation("com.google.android.gms:play-services-drive:17.0.0")
 }

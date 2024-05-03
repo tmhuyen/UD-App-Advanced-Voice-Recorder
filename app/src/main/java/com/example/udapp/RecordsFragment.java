@@ -1,8 +1,12 @@
 package com.example.udapp;
 
+import static android.app.Activity.RESULT_OK;
+import static androidx.fragment.app.FragmentManager.TAG;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -35,6 +39,11 @@ import androidx.fragment.app.Fragment;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.OpenFileActivityBuilder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -52,6 +61,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecordsFragment extends Fragment {
+    private static final String TAG = "RecordsFragment";
+    private static final int REQUEST_CODE_OPENER = 1;
     private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 1002;
     private SearchView searchView;
     private ListView recordsListView;
@@ -64,6 +75,34 @@ public class RecordsFragment extends Fragment {
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     GoogleSignInClient mGoogleSignInClient;
     GoogleSignInOptions gso;
+    private GoogleApiClient googleApiClient;
+
+    private GoogleApiClient getGoogleApiClient() {
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(getActivity())
+                    .addApi(Drive.API)
+                    .addScope(Drive.SCOPE_FILE)
+                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                        @Override
+                        public void onConnected(@Nullable Bundle bundle) {
+                            Log.i(TAG, "GoogleApiClient connected");
+                        }
+
+                        @Override
+                        public void onConnectionSuspended(int i) {
+                            Log.i(TAG, "GoogleApiClient connection suspended");
+                        }
+                    })
+                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                        @Override
+                        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                            Log.e(TAG, "GoogleApiClient connection failed: " + connectionResult.toString());
+                        }
+                    })
+                    .build();
+        }
+        return googleApiClient;
+    }
 
     public RecordsFragment() {
     }
@@ -107,6 +146,24 @@ public class RecordsFragment extends Fragment {
 
 
         });
+        //import button
+        View importBtn = view.findViewById(R.id.importBtn);
+        importBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                IntentSender intentSender = Drive.DriveApi
+                        .newOpenFileActivityBuilder()
+                        .setMimeType(new String[] { "audio/*" })
+                        .build(getGoogleApiClient());
+                try {
+                    startIntentSenderForResult(
+                            intentSender, REQUEST_CODE_OPENER, new Intent(), 0, 0, 0, null);
+                } catch (IntentSender.SendIntentException e) {
+                    Log.w(TAG, "Unable to send intent", e);
+                }
+            }
+        });
+
         recordsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -265,7 +322,21 @@ public class RecordsFragment extends Fragment {
         });
 
     }
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CODE_OPENER:
+                if (resultCode == RESULT_OK) {
+                    DriveId driveId = data.getParcelableExtra(
+                            OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
+                    // Read the file and save its content to your database
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
+        }
+    }
     private void playRecording(String record) {
         player = new MediaPlayer();
         try {
