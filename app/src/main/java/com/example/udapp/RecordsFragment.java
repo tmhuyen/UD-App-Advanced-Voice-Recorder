@@ -250,7 +250,7 @@ public class RecordsFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot recordSnapshot : dataSnapshot.getChildren()) {
                     RecordFirebase record = recordSnapshot.getValue(RecordFirebase.class);
-                    records.add(new RecordFirebase(record.getRecordId(),record.getUsername(),record.getDownloadUrl(),record.getFileName(),record.getDuration()));
+                    records.add(new RecordFirebase(record.getRecordId(),record.getUsername(),record.getDownloadUrl(),record.getFileName(),record.getDuration(), record.getUploadDate()));
                     Log.d("Firebase", "Record: " + record.getFileName());
                 }
                 Log.d("RecordsFragment", "Records: " + records.size());

@@ -93,6 +93,7 @@ public class RecordingFragment extends Fragment {
     GoogleSignInClient mGoogleSignInClient;
     GoogleSignInOptions gso;
     ImageView playButton;
+    private int duration;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -254,6 +255,7 @@ public class RecordingFragment extends Fragment {
                     seconds++;
                     handler.postDelayed(this, 1000);
                 }
+                duration = seconds;
             }
         };
         handler.post(runnable);
@@ -331,13 +333,16 @@ public class RecordingFragment extends Fragment {
                     dbRef = FirebaseDatabase.getInstance().getReference("records");
                     String recordId = dbRef.push().getKey();
                     MediaPlayer mediaPlayer = new MediaPlayer();
-                    int duration = seconds;
+
+                    LocalDateTime now = LocalDateTime.now();
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+                    String uploadDate = dtf.format(now);
 
                     RecordFirebase recordFB;
                     if (user != null) {
-                        recordFB = new RecordFirebase(recordId, user.getDisplayName(), downloadUrl, fileName, duration);
+                        recordFB = new RecordFirebase(recordId, user.getDisplayName(), downloadUrl, fileName, duration, uploadDate);
                     } else {
-                        recordFB = new RecordFirebase(recordId, name, downloadUrl, fileName, duration);
+                        recordFB = new RecordFirebase(recordId, name, downloadUrl, fileName, duration, uploadDate);
                     }
 
                     dbRef.child(recordId).setValue(recordFB)

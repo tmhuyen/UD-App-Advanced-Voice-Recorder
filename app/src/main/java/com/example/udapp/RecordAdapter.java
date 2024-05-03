@@ -52,7 +52,7 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
         ImageView note = convertView.findViewById(R.id.editNoteIcon);
 
         recordName.setText(file.getFileName());
-        recordInfo.setText(String.valueOf(file.getDuration()));
+        recordInfo.setText(String.valueOf(file.getDuration()) + " seconds | " + file.getUploadDate());
         note.setImageResource(R.drawable.baseline_edit_note_24);
 
         return convertView;
