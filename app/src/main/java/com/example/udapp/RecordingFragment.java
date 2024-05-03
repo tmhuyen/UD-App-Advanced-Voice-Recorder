@@ -154,8 +154,10 @@ public class RecordingFragment extends Fragment {
     private void onPause(boolean start) {
         if (start) {
             pauseRecording();
+            isRecording = false;
         } else {
             resumeRecording();
+            isRecording = true;
         }
     }
 
@@ -164,6 +166,8 @@ public class RecordingFragment extends Fragment {
             recorder.pause();
             // Change the button image to a "resume" icon
             playButton.setImageResource(R.drawable.recording_play);
+            //stop the timer
+            handler.removeCallbacks(runnable);
         }
     }
 
@@ -172,6 +176,8 @@ public class RecordingFragment extends Fragment {
             recorder.resume();
             // Change the button image to a "pause" icon
             playButton.setImageResource(R.drawable.recording_pause);
+            //continue the timer
+            handler.post(runnable);
         }
     }
     private void onRecord() {
