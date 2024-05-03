@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.view.View;
 
+import com.chibde.visualizer.LineBarVisualizer;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FileDownloadTask;
@@ -74,8 +75,9 @@ public class PlayRecord extends AppCompatActivity {
                 player.pause();
                 playIcon.setImageResource(R.drawable.recording_play); // change to play icon
             } else {
+                LineBarVisualizer lineBarVisualizer = findViewById(R.id.visualizer);
                 player.start();
-                playIcon.setImageResource(R.drawable.recording_pause); // change to pause icon
+                lineBarVisualizer.setPlayer(player.getAudioSessionId());
             }
         }
     }
