@@ -120,39 +120,11 @@ public class RecordsFragment extends Fragment {
 //                intent.putExtra("fileName", fileName);
 //                Log.e("RecordsFragment", "Playing " + fileName);
 //                getActivity().startService(intent);
+                Intent intent = new Intent(getActivity(), PlayRecord.class);
+                intent.putExtra("downloadUrl", records.get(position).getDownloadUrl());
+                intent.putExtra("fileName", records.get(position).getFileName());
+                startActivity(intent);
 
-                FirebaseStorage storage = FirebaseStorage.getInstance();
-                StorageReference storageRef = storage.getReferenceFromUrl(records.get(position).getDownloadUrl());
-
-                File localFile = new File(getActivity().getExternalCacheDir(), records.get(position).getFileName());
-
-                storageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        // Local temp file has been created
-                        Log.d("Firebase", "Download Success");
-                        player = new MediaPlayer();
-                        try {
-                            player.setDataSource(localFile.getAbsolutePath());
-                            player.prepare();
-                            player.start();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        if (player != null && player.isPlaying()) {
-                            player.stop();
-                            player.release();
-                            player = null;
-                            localFile.delete();
-                        }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle any errors
-                        Log.e("Firebase", "Download Failed");
-                    }
-                });
             }
         });
 

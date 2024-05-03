@@ -47,14 +47,26 @@ import com.google.cloud.speech.v1p1beta1.RecognitionAudio;
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionAlternative;
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult;
 import com.google.cloud.speech.v1p1beta1.StreamingRecognitionConfig;
-//import com.google.cloud.speech.v1p1beta1.StreamingRecognitionRequest;
-//import com.google.cloud.speech.v1p1beta1.StreamingRecognitionResponse;
+import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.speech.v1p1beta1.SpeechSettings;
+import com.google.cloud.speech.v1p1beta1.StreamingRecognizeRequest;
+import com.google.cloud.speech.v1p1beta1.StreamingRecognizeResponse;
+import com.google.cloud.speech.v1p1beta1.StreamingRecognitionResult;
+import com.google.cloud.speech.v1p1beta1.WordInfo;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.StorageReference;
 import com.google.protobuf.ByteString;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.speech.v1p1beta1.SpeechSettings;
+
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -80,6 +92,7 @@ public class RecordingFragment extends Fragment {
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     GoogleSignInClient mGoogleSignInClient;
     GoogleSignInOptions gso;
+    ImageView playButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,7 +104,7 @@ public class RecordingFragment extends Fragment {
             audioFormat = bundle.getString("format");
         }
         ImageView recordButton = view.findViewById(R.id.recordBtn);
-        ImageView playButton = view.findViewById(R.id.playBtn);
+        playButton = view.findViewById(R.id.playBtn);
 
         // Initialize Firebase Storage
         storageReference = FirebaseStorage.getInstance().getReference();
@@ -111,11 +124,35 @@ public class RecordingFragment extends Fragment {
             }
         });
 
-        playButton.setOnClickListener(v -> onPlay(player == null));
+        playButton.setOnClickListener(v -> onPause(isRecording));
 
         myDB = new MyDB(getActivity());
 
         return view;
+    }
+
+    private void onPause(boolean start) {
+        if (start) {
+            pauseRecording();
+        } else {
+            resumeRecording();
+        }
+    }
+
+    private void pauseRecording() {
+        if (recorder != null) {
+            recorder.pause();
+            // Change the button image to a "resume" icon
+            playButton.setImageResource(R.drawable.recording_play);
+        }
+    }
+
+    private void resumeRecording() {
+        if (recorder != null) {
+            recorder.resume();
+            // Change the button image to a "pause" icon
+            playButton.setImageResource(R.drawable.recording_pause);
+        }
     }
     private void onRecord() {
         if (!isRecording) {
@@ -294,15 +331,8 @@ public class RecordingFragment extends Fragment {
                     dbRef = FirebaseDatabase.getInstance().getReference("records");
                     String recordId = dbRef.push().getKey();
                     MediaPlayer mediaPlayer = new MediaPlayer();
-                    int duration = 0;
-                    try {
-                        mediaPlayer.setDataSource(filePath);
-                        mediaPlayer.prepare();
-                        duration = mediaPlayer.getDuration(); // Duration in milliseconds
-                        mediaPlayer.release();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    int duration = seconds;
+
                     RecordFirebase recordFB;
                     if (user != null) {
                         recordFB = new RecordFirebase(recordId, user.getDisplayName(), downloadUrl, fileName, duration);
@@ -342,6 +372,7 @@ public class RecordingFragment extends Fragment {
     private String transcribeAudio(String filePath) throws IOException {
         // Replace with your Google Cloud project ID
         String projectId = "record-voice-f7bc5";
+        Log.d("RecordingFragment", "Transcribing audio file: " + filePath);
 
         // Create a SpeechClient instance
         try (SpeechClient speechClient = SpeechClient.create()) {
@@ -382,13 +413,19 @@ public class RecordingFragment extends Fragment {
 
             // Perform speech recognition
             RecognizeResponse response = speechClient.recognize(request);
+            Log.d("RecordingFragment", "Number of results: " + response.getResultsList().size());
 
             // Get transcribed text
             for (SpeechRecognitionResult result : response.getResultsList()) {
                 for (SpeechRecognitionAlternative alternative : result.getAlternativesList()) {
+                    Log.d("RecordingFragment", "Transcription: " + alternative.getTranscript());
                     return alternative.getTranscript();
                 }
             }
+        } catch (IOException e) {
+            Log.e("RecordingFragment", "Error transcribing audio: " + e.getMessage(), e);
+        } catch (Exception e) {
+            Log.e("RecordingFragment", "Unexpected error: " + e.getMessage(), e);
         }
 
         return "";
