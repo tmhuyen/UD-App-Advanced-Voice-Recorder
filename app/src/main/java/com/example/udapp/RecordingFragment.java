@@ -18,9 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.chibde.visualizer.LineBarVisualizer;
 
@@ -72,7 +74,18 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 public class RecordingFragment extends Fragment {
+    private static RecordingFragment instance = null;
 
+    // Private constructor to prevent instantiation
+    public RecordingFragment() {}
+
+    // Method to get the instance of RecordingFragment
+    public static synchronized RecordingFragment getInstance() {
+        if (instance == null) {
+            instance = new RecordingFragment();
+        }
+        return instance;
+    }
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION = 1001;
     private static final int REQUEST_READ_EXTERNAL_STORAGE_PERMISSION = 1002;
     private MyDB myDB;
@@ -94,36 +107,17 @@ public class RecordingFragment extends Fragment {
 
     private int duration;
 
-    private String selectedAudioSource;
-    private String selectedOutputFormat;
+    private String selectedAudioSource = null;
+    private String selectedOutputFormat = null;
     private int audioSource;
-
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Get the arguments from the Bundle
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            // Retrieve the selected audio source and output format
-            selectedAudioSource = bundle.getString("selectedAudioSource");
-            selectedOutputFormat = bundle.getString("selectedOutputFormat");
-        }
-        // Map the selected audio source to the corresponding constant
-
-        if ("MIC".equals(selectedAudioSource)) {
-            audioSource = MediaRecorder.AudioSource.MIC;
-        } else if ("VOICE_COMMUNICATION".equals(selectedAudioSource)) {
-            audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
-        } else if ("VOICE_RECOGNITION".equals(selectedAudioSource)) {
-            audioSource = MediaRecorder.AudioSource.VOICE_RECOGNITION;
-        } else {
-            audioSource = MediaRecorder.AudioSource.DEFAULT;
-        }
-        //Update format text
-        TextView formatText = getActivity().findViewById(R.id.recordFormat);
-        formatText.setText("Format: " + selectedOutputFormat);
+    public void setSelectedAudioSource(String selectedAudioSource) {
+        this.selectedAudioSource = selectedAudioSource;
     }
+
+    public void setSelectedOutputFormat(String selectedOutputFormat) {
+        this.selectedOutputFormat = selectedOutputFormat;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recording, container, false);
@@ -133,7 +127,32 @@ public class RecordingFragment extends Fragment {
 
         // Initialize Firebase Storage
         storageReference = FirebaseStorage.getInstance().getReference();
+        //Get bundle from SettingsFragment
+        Bundle bundle = this.getArguments();
+        if (bundle != null) {
+            setSelectedAudioSource(bundle.getString("selectedAudioSource"));
+            setSelectedOutputFormat(bundle.getString("selectedOutputFormat"));
+            //Update format text
+            TextView formatText = view.findViewById(R.id.recordFormat);
+            formatText.setText("Format: " + selectedOutputFormat);
+            Toast.makeText(getActivity(), "The format audio is: " + selectedOutputFormat, Toast.LENGTH_SHORT).show();
+        }
 
+        if (selectedAudioSource == null) {
+            selectedAudioSource = "MIC";
+        }
+        if (selectedOutputFormat == null) {
+            selectedOutputFormat = "mp3";
+        }
+        if ("MIC".equals(selectedAudioSource)) {
+            audioSource = MediaRecorder.AudioSource.MIC;
+        } else if ("VOICE_COMMUNICATION".equals(selectedAudioSource)) {
+            audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+        } else if ("VOICE_RECOGNITION".equals(selectedAudioSource)) {
+            audioSource = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+        } else {
+            audioSource = MediaRecorder.AudioSource.DEFAULT;
+        }
 
         recordButton.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -155,6 +174,7 @@ public class RecordingFragment extends Fragment {
 
         return view;
     }
+
 
     private void onPause(boolean start) {
         if (start) {
@@ -328,7 +348,7 @@ public class RecordingFragment extends Fragment {
         Log.d("RecordingFragment", "Uploading audio to Firebase Storage " + filePath);
         if (filePath != null) {
             // Create a reference to the audio file in Firebase Storage
-            String fileName = "audio_" + System.currentTimeMillis() + ".mp3"; // Adjust file name as needed
+            String fileName = "audio_" + System.currentTimeMillis() + selectedOutputFormat; // Adjust file name as needed
             StorageReference audioRef = storageReference.child("audio").child(fileName);
 
             // Upload the file to Firebase Storage
@@ -372,7 +392,8 @@ public class RecordingFragment extends Fragment {
                     dbRef.child(recordId).setValue(recordFB)
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(getActivity(), "Record saved to Firebase", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), "The format audio is: " + selectedOutputFormat, Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(getActivity(), "Record saved to Firebase", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Toast.makeText(getActivity(), "Failed to save record to Firebase", Toast.LENGTH_SHORT).show();
                                 }
