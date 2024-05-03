@@ -1,33 +1,22 @@
 package com.example.udapp;
 
 import static android.app.Activity.RESULT_OK;
-import static androidx.fragment.app.FragmentManager.TAG;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.credentials.Credential;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.Filter;
 import android.widget.ListView;
-import android.media.MediaPlayer;
 import android.widget.SearchView;
-import android.widget.Toast;
-import android.content.Context;
-
-import java.io.File;
-import java.io.IOException;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,13 +28,22 @@ import androidx.fragment.app.Fragment;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.FileList;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -57,7 +55,14 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class RecordsFragment extends Fragment {
@@ -75,35 +80,35 @@ public class RecordsFragment extends Fragment {
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     GoogleSignInClient mGoogleSignInClient;
     GoogleSignInOptions gso;
-    private GoogleApiClient googleApiClient;
+    private static final String APPLICATION_NAME = "UD App";
+    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
-    private GoogleApiClient getGoogleApiClient() {
-        if (googleApiClient == null) {
-            googleApiClient = new GoogleApiClient.Builder(getActivity())
-                    .addApi(Drive.API)
-                    .addScope(Drive.SCOPE_FILE)
-                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                        @Override
-                        public void onConnected(@Nullable Bundle bundle) {
-                            Log.i(TAG, "GoogleApiClient connected");
-                        }
+    private static final List<String> SCOPES =
+            Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
+    private static final String CREDENTIALS_FILE_PATH = "/.json";
 
-                        @Override
-                        public void onConnectionSuspended(int i) {
-                            Log.i(TAG, "GoogleApiClient connection suspended");
-                        }
-                    })
-                    .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                        @Override
-                        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                            Log.e(TAG, "GoogleApiClient connection failed: " + connectionResult.toString());
-                        }
-                    })
-                    .build();
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
+            throws IOException {
+        // Load client secrets.
+        InputStream in = RecordsFragment.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        if (in == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
-        return googleApiClient;
-    }
+        GoogleClientSecrets clientSecrets =
+                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
+        // Build flow and trigger user authorization request.
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+                .setAccessType("offline")
+                .build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        AuthorizationCodeInstalledApp ab = new AuthorizationCodeInstalledApp(flow, receiver);
+        //returns an authorized Credential object.
+        return credential;
+    }
     public RecordsFragment() {
     }
 
@@ -146,20 +151,33 @@ public class RecordsFragment extends Fragment {
 
 
         });
+
         //import button
         View importBtn = view.findViewById(R.id.importBtn);
         importBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IntentSender intentSender = Drive.DriveApi
-                        .newOpenFileActivityBuilder()
-                        .setMimeType(new String[] { "audio/*" })
-                        .build(getGoogleApiClient());
                 try {
-                    startIntentSenderForResult(
-                            intentSender, REQUEST_CODE_OPENER, new Intent(), 0, 0, 0, null);
-                } catch (IntentSender.SendIntentException e) {
-                    Log.w(TAG, "Unable to send intent", e);
+                    final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+                    Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                            .setApplicationName(APPLICATION_NAME)
+                            .build();
+
+                    // Print the names and IDs for up to 10 files.
+                    List<File> files = service.files().list()
+                            .setPageSize(10)
+                            .setFields("nextPageToken, files(id, name)")
+                            .execute().getFiles();
+                    if (files == null || files.isEmpty()) {
+                        System.out.println("No files found.");
+                    } else {
+                        System.out.println("Files:");
+                        for (File file : files) {
+                            System.out.printf("%s (%s)\n", file.getName(), file.getId());
+                        }
+                    }
+                } catch (GeneralSecurityException | IOException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -324,17 +342,14 @@ public class RecordsFragment extends Fragment {
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CODE_OPENER:
-                if (resultCode == RESULT_OK) {
-                    DriveId driveId = data.getParcelableExtra(
-                            OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
-                    // Read the file and save its content to your database
-                }
-                break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
-                break;
+        if (requestCode == REQUEST_CODE_OPENER) {
+            if (resultCode == RESULT_OK) {
+                DriveId driveId = data.getParcelableExtra(
+                        OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
+                // Read the file and save its content to your database
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
     private void playRecording(String record) {
