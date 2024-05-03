@@ -48,7 +48,6 @@ import com.google.cloud.speech.v1p1beta1.SpeechRecognitionAlternative;
 import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult;
 import com.google.cloud.speech.v1p1beta1.StreamingRecognitionConfig;
 import com.google.api.gax.core.FixedCredentialsProvider;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1p1beta1.SpeechSettings;
 import com.google.cloud.speech.v1p1beta1.StreamingRecognizeRequest;
 import com.google.cloud.speech.v1p1beta1.StreamingRecognizeResponse;
@@ -85,7 +84,6 @@ public class RecordingFragment extends Fragment {
     private Runnable runnable;
     private int seconds = 0;
     private Visualizer visualizer = null;
-    private String audioFormat = "mp3";
     private boolean isRecording = false;
     private StorageReference storageReference;
     private DatabaseReference dbRef;
@@ -93,16 +91,39 @@ public class RecordingFragment extends Fragment {
     GoogleSignInClient mGoogleSignInClient;
     GoogleSignInOptions gso;
     ImageView playButton;
+    private String selectedAudioSource;
+    private String selectedOutputFormat;
+    private int audioSource;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Get the arguments from the Bundle
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            // Retrieve the selected audio source and output format
+            selectedAudioSource = bundle.getString("selectedAudioSource");
+            selectedOutputFormat = bundle.getString("selectedOutputFormat");
+        }
+        // Map the selected audio source to the corresponding constant
+
+        if ("MIC".equals(selectedAudioSource)) {
+            audioSource = MediaRecorder.AudioSource.MIC;
+        } else if ("VOICE_COMMUNICATION".equals(selectedAudioSource)) {
+            audioSource = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+        } else if ("VOICE_RECOGNITION".equals(selectedAudioSource)) {
+            audioSource = MediaRecorder.AudioSource.VOICE_RECOGNITION;
+        } else {
+            audioSource = MediaRecorder.AudioSource.DEFAULT;
+        }
+        //Update format text
+        TextView formatText = getActivity().findViewById(R.id.recordFormat);
+        formatText.setText("Format: " + selectedOutputFormat);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_recording, container, false);
-
-        Bundle bundle = this.getArguments();
-        if (bundle != null) {
-            fileName = bundle.getString("path");
-            audioFormat = bundle.getString("format");
-        }
+        
         ImageView recordButton = view.findViewById(R.id.recordBtn);
         playButton = view.findViewById(R.id.playBtn);
 
@@ -202,19 +223,19 @@ public class RecordingFragment extends Fragment {
     private void startRecording() {
         try {
             recorder = new MediaRecorder();
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            if (audioFormat == null) {
-                audioFormat = "mp3";
+            recorder.setAudioSource(audioSource);
+            if (selectedOutputFormat == null) {
+                selectedOutputFormat = "mp3";
             }
-            else if (audioFormat.equals("mp3")){
+            else if (selectedOutputFormat.equals("mp3")||selectedOutputFormat.equals("MP3")||selectedOutputFormat.equals("Mp3")){
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             }
-            else if (audioFormat.equals("aac")) {
+            else if (selectedOutputFormat.equals("aac")||selectedOutputFormat.equals("AAC")||selectedOutputFormat.equals("Aac")) {
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             }
-            else if (audioFormat.equals("wav")) {
+            else if (selectedOutputFormat.equals("wav")||selectedOutputFormat.equals("WAV")||selectedOutputFormat.equals("Wav")) {
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             }
@@ -222,13 +243,13 @@ public class RecordingFragment extends Fragment {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
             LocalDateTime now = LocalDateTime.now();
             //fileName = getActivity().getExternalCacheDir().getAbsolutePath();
-            File tempFile = File.createTempFile("audio", "." + audioFormat, getActivity().getCacheDir());
+            File tempFile = File.createTempFile("audio", "." + selectedOutputFormat, getActivity().getCacheDir());
             int hours = seconds / 3600;
             int minutes = (seconds % 3600) / 60;
             int secs = seconds % 60;
 
             String time = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, secs);
-            //fileName+= "/audio"+ dtf.format(now)+"." + audioFormat;
+            //fileName+= "/audio"+ dtf.format(now)+"." + selectedOutputFormat;
             fileName = tempFile.getAbsolutePath();
             recorder.setOutputFile(fileName);
             recorder.prepare();
