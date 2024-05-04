@@ -82,15 +82,15 @@ public class RecordingFragment extends Fragment {
 
     private int duration;
 
-    private String selectedAudioSource = null;
-    private String selectedOutputFormat = null;
+    public String selectedAudioSource = null;
+    public String selectedOutputFormat = null;
     private int audioSource;
     public void setSelectedAudioSource(String selectedAudioSource) {
-        this.selectedAudioSource = selectedAudioSource;
+        getInstance().selectedAudioSource = selectedAudioSource;
     }
 
     public void setSelectedOutputFormat(String selectedOutputFormat) {
-        this.selectedOutputFormat = selectedOutputFormat;
+        getInstance().selectedOutputFormat = selectedOutputFormat;
     }
 
     @Override
@@ -110,8 +110,8 @@ public class RecordingFragment extends Fragment {
             //Update format text
             TextView formatText = view.findViewById(R.id.recordFormat);
             formatText.setText("Format: " + selectedOutputFormat);
-            Toast.makeText(getActivity(), "The format audio is: " + selectedOutputFormat, Toast.LENGTH_SHORT).show();
         }
+        Toast.makeText(getActivity(), "The format audio is: " + selectedOutputFormat, Toast.LENGTH_SHORT).show();
 
         if (selectedAudioSource == null) {
             selectedAudioSource = "MIC";
