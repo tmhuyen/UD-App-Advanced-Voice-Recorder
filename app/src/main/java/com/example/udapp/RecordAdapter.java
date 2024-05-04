@@ -150,6 +150,7 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
         record.setFileName(newName);
         dbRef.child(record.getRecordId()).setValue(record);
         notifyDataSetChanged();
+        Toast.makeText(context, "File renamed", Toast.LENGTH_SHORT).show();
     }
 
     private void showDeleteDialog(int position) {
@@ -180,6 +181,7 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
         record.setUsername("");
         dbRef.child(record.getRecordId()).setValue(record);
         notifyDataSetChanged();
+        Toast.makeText(context, "File deleted", Toast.LENGTH_SHORT).show();
     }
 
     @Override
