@@ -33,9 +33,9 @@ import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+//import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+//import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+//import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
@@ -292,7 +292,7 @@ public class RecordsFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot recordSnapshot : dataSnapshot.getChildren()) {
                     RecordFirebase record = recordSnapshot.getValue(RecordFirebase.class);
-                    records.add(new RecordFirebase(record.getRecordId(),record.getUsername(),record.getDownloadUrl(),record.getFileName(),record.getDuration(), record.getUploadDate()));
+                    records.add(new RecordFirebase(record.getRecordId(),record.getUsername(),record.getDownloadUrl(),record.getFileName(),record.getDuration(), record.getUploadDate(), record.getNotes()));
                     Log.d("Firebase", "Record: " + record.getFileName());
                 }
                 Log.d("RecordsFragment", "Records: " + records.size());

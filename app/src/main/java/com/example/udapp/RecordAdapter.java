@@ -75,10 +75,13 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
         noteIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                notifyDataSetChanged();
                 RecordFirebase record = getItem(position);
                 Intent intent = new Intent(context, TakeNote.class);
                 intent.putExtra("recordId", record.getRecordId());
                 intent.putExtra("fileName", record.getFileName()); // Pass the file name
+                intent.putExtra("notes", record.getNotes());
+                //Toast.makeText(context, "Edit Note" + record.getNotes(), Toast.LENGTH_SHORT).show();
                 context.startActivity(intent);
             }
         });

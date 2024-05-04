@@ -431,12 +431,12 @@ public class RecordingFragment extends Fragment {
                     LocalDateTime now = LocalDateTime.now();
                     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
                     String uploadDate = dtf.format(now);
-
+                    String notes = "Transcription: " + textTranscription.getText().toString();
                     RecordFirebase recordFB;
                     if (user != null) {
-                        recordFB = new RecordFirebase(recordId, user.getDisplayName(), downloadUrl, fileName, duration, uploadDate);
+                        recordFB = new RecordFirebase(recordId, user.getDisplayName(), downloadUrl, fileName, duration, uploadDate, notes);
                     } else {
-                        recordFB = new RecordFirebase(recordId, name, downloadUrl, fileName, duration, uploadDate);
+                        recordFB = new RecordFirebase(recordId, name, downloadUrl, fileName, duration, uploadDate, notes);
                     }
 
                     dbRef.child(recordId).setValue(recordFB)

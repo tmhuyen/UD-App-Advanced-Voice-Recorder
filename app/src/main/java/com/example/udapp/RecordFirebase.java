@@ -7,17 +7,19 @@ public class RecordFirebase {
     private String filename;
     private int duration;
     private String uploadDate;
+    private String notes;
 
     public RecordFirebase() {
     }
 
-    public RecordFirebase(String recordId, String username, String downloadUrl, String filename, int duration, String uploadDate) {
+    public RecordFirebase(String recordId, String username, String downloadUrl, String filename, int duration, String uploadDate, String notes) {
         this.recordId = recordId;
         this.username = username;
         this.downloadUrl = downloadUrl;
         this.filename = filename;
         this.duration = duration;
         this.uploadDate = uploadDate;
+        this.notes = notes;
     }
 
     public String getUsername() {
@@ -55,6 +57,12 @@ public class RecordFirebase {
     }
     public void setUploadDate(String uploadDate) {
         this.uploadDate = uploadDate;
+    }
+    public String getNotes() {
+        return notes;
+    }
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
 }
