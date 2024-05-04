@@ -105,11 +105,13 @@ public class AccountFragment extends Fragment {
         mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
         FirebaseUser user = mAuth.getCurrentUser();
         TextView nameTextView = view.findViewById(R.id.name);
+        TextView emailTextView = view.findViewById(R.id.email);
         SharedPreferences settings = getActivity().getSharedPreferences("LoginPrefs", 0);
         String name = settings.getString("username", "");
         Log.d("AccountFragment", "onCreate: " + name);
         if (user != null) {
             nameTextView.setText("Name: "+ user.getDisplayName());
+            emailTextView.setText("Email: "+ user.getEmail());
         } else {
             nameTextView.setText("Name: "+ name);
         }
