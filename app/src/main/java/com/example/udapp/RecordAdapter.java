@@ -273,22 +273,19 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                Log.d("RecordAdapter", "performFiltering called with constraint: " + constraint);
                 FilterResults results = new FilterResults();
                 if (constraint == null || constraint.length() == 0) {
-                    results.values = records; // 'records' is your original list.
+                    results.values = new ArrayList<>(records); // 'records' is your original list.
                     results.count = records.size();
                 } else {
-                    filteredRecords = new ArrayList<>();
+                    List<RecordFirebase> filteredList = new ArrayList<>();
                     for (RecordFirebase record : records) {
                         if (record.getFileName().toLowerCase().contains(constraint.toString().toLowerCase())) {
-                            Log.d("RecordAdapter", "performFiltering: " + record.getFileName().toLowerCase());
-                            Log.e("RecordAdapter", "performFiltering: " + constraint.toString().toLowerCase());
-                            filteredRecords.add(record);
+                            filteredList.add(record);
                         }
                     }
-                    results.values = filteredRecords;
-                    results.count = filteredRecords.size();
+                    results.values = filteredList;
+                    results.count = filteredList.size();
                 }
                 return results;
             }
