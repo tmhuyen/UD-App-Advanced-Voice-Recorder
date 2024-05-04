@@ -27,14 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
-
-import java.io.File;
-import java.io.IOException;
+import android.content.Intent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,16 +71,15 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
         recordInfo.setText(String.valueOf(file.getDuration()) + " seconds | " + file.getUploadDate());
         note.setImageResource(R.drawable.baseline_edit_note_24);
 
+
         convertView.setOnTouchListener(new View.OnTouchListener() {
             float downXValue;
-
-
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         downXValue = event.getX();
-                        return true;
+                        return false;
 
                     case MotionEvent.ACTION_UP:
                         float currentX = event.getX();

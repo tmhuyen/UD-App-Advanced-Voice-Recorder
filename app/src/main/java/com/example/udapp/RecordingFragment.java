@@ -1,6 +1,7 @@
 package com.example.udapp;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -9,6 +10,9 @@ import android.media.audiofx.Visualizer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +50,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class RecordingFragment extends Fragment {
@@ -84,6 +89,8 @@ public class RecordingFragment extends Fragment {
 
     public String selectedAudioSource = null;
     public String selectedOutputFormat = null;
+    private SpeechRecognizer speechRecognizer;
+    private TextView textTranscription;
     private int audioSource;
     public void setSelectedAudioSource(String selectedAudioSource) {
         getInstance().selectedAudioSource = selectedAudioSource;
@@ -128,6 +135,59 @@ public class RecordingFragment extends Fragment {
         } else {
             audioSource = MediaRecorder.AudioSource.DEFAULT;
         }
+
+        textTranscription = view.findViewById(R.id.textTranscription);
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getContext());
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+                // This is called when the endpointer is ready for you to start speaking.
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+                // This is called when the user starts speaking.
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+                // This is called when the RMS level of the audio changes.
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+                // This is called when more sound has been received.
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+                // This is called when the user stops speaking.
+            }
+
+            @Override
+            public void onError(int error) {
+                // This is called when an error occurs.
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                if (matches != null && !matches.isEmpty()) {
+                    textTranscription.setText(matches.get(0));
+                }
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+                // This is called when partial recognition results are available.
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+                // This is called when an event occurs.
+            }
+        });
 
         recordButton.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -200,7 +260,13 @@ public class RecordingFragment extends Fragment {
         }
     }
 
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+        }
+    }
     private void onPlay(boolean start) {
         if (start) {
             startPlaying();
@@ -215,6 +281,9 @@ public class RecordingFragment extends Fragment {
             player.setDataSource(fileName);
             player.prepare();
             player.start();
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            speechRecognizer.startListening(intent);
         } catch (IOException e) {
             e.printStackTrace();
         }
