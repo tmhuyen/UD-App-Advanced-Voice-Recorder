@@ -71,7 +71,17 @@ public class RecordAdapter extends ArrayAdapter<RecordFirebase> {
         recordInfo.setText(String.valueOf(file.getDuration()) + " seconds | " + file.getUploadDate());
         note.setImageResource(R.drawable.baseline_edit_note_24);
 
-
+        ImageView noteIcon = convertView.findViewById(R.id.editNoteIcon);
+        noteIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RecordFirebase record = getItem(position);
+                Intent intent = new Intent(context, TakeNote.class);
+                intent.putExtra("recordId", record.getRecordId());
+                intent.putExtra("fileName", record.getFileName()); // Pass the file name
+                context.startActivity(intent);
+            }
+        });
         convertView.setOnTouchListener(new View.OnTouchListener() {
             float downXValue;
             @Override
